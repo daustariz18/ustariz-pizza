@@ -5,33 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ustariz Pizza | Menú Digital</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<header>
-    <img src="img/logo.png" alt="Ustariz Pizza" class="logo">
-</header>
+    <header>
+        <img src="img/logo.png" alt="Ustariz Pizza" class="logo">
+    </header>
 
-<nav class="tabs" id="tabs-bar"></nav>
+    <nav class="tabs" id="tabs-bar"></nav>
 
-<div class="helper-bar">
-    <span id="instruction">Selecciona hasta 2 sabores para tu pizza</span>
-</div>
-
-<main class="menu-grid" id="menu-content"></main>
-
-<footer class="cart-panel">
-    <div class="summary">
-        <span id="selection-text">0/2 sabores</span>
-        <span id="total-price">$0</span>
+    <div class="helper-text">
+        <p>Selecciona hasta 2 sabores (se cobrará el de mayor valor)</p>
     </div>
-    <input type="text" id="direccion" placeholder="📍 Dirección de entrega y barrio">
-    <button class="order-btn" id="submit-order" disabled onclick="handleOrder()">
-        ENVIAR PEDIDO A WHATSAPP
-    </button>
-</footer>
 
-<script src="script.js"></script>
+    <main class="menu-grid" id="menu-content"></main>
+
+    <footer class="cart-panel">
+        <div class="summary">
+            <span id="selection-text">0/2 sabores</span>
+            <span id="total-price">$0</span>
+        </div>
+        
+        <input type="text" id="direccion" placeholder="📍 Tu dirección y barrio" required>
+        
+        <button class="order-btn" id="submit-order" disabled onclick="handleOrder()">
+            CONFIRMAR PEDIDO POR WHATSAPP
+        </button>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

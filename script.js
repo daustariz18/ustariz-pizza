@@ -1,101 +1,82 @@
-const menuData = [
-    { t: "Personal", s: "Salami", p: 20000, img: "salami.png" },
-    { t: "Personal", s: "Jamon", p: 20000, img: "Jamon.png" },
-    { t: "Personal", s: "Pollo", p: 20000, img: "Pollo.png" },
-    { t: "Personal", s: "Pepperoni", p: 20000, img: "pepperoni.png" },
-    { t: "Personal", s: "Salami Pimenton", p: 20000, img: "Salami-Pimenton.png" },
-    { t: "Personal", s: "Hawaiana", p: 20000, img: "Hawaiana.png" },
-    { t: "Personal", s: "Pollo Jamon", p: 20000, img: "Jamon-Pollo.png" },
-    { t: "Personal", s: "3 Carnes", p: 22000, img: "3-Carnes.png" },
-    // Para Small...
-    { t: "Small", s: "Salami", p: 28000, img: "salami.png" },
-    { t: "Small", s: "Pepperoni", p: 30000, img: "pepperoni.png" },
-    { t: "Small", s: "3 Carnes", p: 32000, img: "3-Carnes.png" },
-    // Añade el resto siguiendo este patrón
-];
+// URL de tu Google Sheet publicada como CSV
+const CSV_URL = 'ESCRIBE_AQUÍ_TU_URL_DE_GOOGLE_SHEETS'; 
 
-let selectedSabores = [];
-let currentSize = "Personal";
-const sizes = ["Personal", "Small", "Medium", "Large", "X-Large"];
+let menuData = []; // Aquí guardaremos todo el menú
+let activeSize = "Personal"; // Tamaño por defecto
 
-function init() {
-    const tabs = document.getElementById('tabs-bar');
-    sizes.forEach(size => {
-        const btn = document.createElement('button');
-        btn.className = `tab-btn ${size === currentSize ? 'active' : ''}`;
-        btn.innerText = size;
-        btn.onclick = () => changeSize(size, btn);
-        tabs.appendChild(btn);
-    });
-    renderMenu();
-    document.getElementById('direccion').value = localStorage.getItem('user_dir') || "";
-}
-
-function changeSize(size, btn) {
-    currentSize = size;
-    selectedSabores = []; // Reset al cambiar tamaño
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    updateCartUI();
-    renderMenu();
+async function loadMenu() {
+    try {
+        const response = await fetch(CSV_URL);
+        const data = await response.text();
+        // Separamos por líneas y saltamos el encabezado
+        const rows = data.split('\n').slice(1); 
+        
+        menuData = rows.map(row => {
+            const cols = row.split(',');
+            return {
+                t: cols[0]?.trim(), // Tamaño (Personal, Small, etc.)
+                s: cols[1]?.trim(), // Sabor (3 Carnes, Hawaiana, etc.)
+                p: parseInt(cols[2]), // Precio
+                img: cols[3]?.trim()  // Ruta de imagen (ej: img/3-Carnes.png)
+            };
+        });
+        
+        renderMenu(); // Dibujar las pizzas
+    } catch (error) {
+        console.error("Error cargando el menú:", error);
+    }
 }
 
 function renderMenu() {
     const grid = document.getElementById('menu-content');
-    grid.innerHTML = "";
-    
-    menuData.filter(item => item.t === currentSize).forEach(pizza => {
-        const isSelected = selectedSabores.find(s => s.s === pizza.s);
+    grid.innerHTML = ""; // Limpiar antes de dibujar
+
+    // Filtramos para mostrar solo las del tamaño activo
+    const filteredPizzas = menuData.filter(pizza => pizza.t === activeSize);
+
+    filteredPizzas.forEach(pizza => {
         const card = document.createElement('div');
-        card.className = `pizza-card ${isSelected ? 'selected' : ''}`;
+        card.className = 'pizza-card';
+        
+        // Estructura de la tarjeta usando tus archivos locales
         card.innerHTML = `
-            <img src="img/${pizza.img}" class="pizza-img" onerror="this.src='img/logo.png'">
+            <img src="${pizza.img}" class="pizza-img" onerror="this.src='img/logo.png'">
             <div class="pizza-info">
                 <h3>${pizza.s}</h3>
                 <span class="price">$${pizza.p.toLocaleString()}</span>
             </div>
         `;
-        card.onclick = () => selectSabor(pizza);
+        
         grid.appendChild(card);
     });
 }
 
-function selectSabor(pizza) {
-    const index = selectedSabores.findIndex(s => s.s === pizza.s);
-    if (index > -1) {
-        selectedSabores.splice(index, 1);
-    } else if (selectedSabores.length < 2) {
-        selectedSabores.push(pizza);
-    }
-    updateCartUI();
-    renderMenu();
-}
+// Iniciar la carga al abrir la página
+loadMenu();
 
-function updateCartUI() {
-    const count = selectedSabores.length;
-    // REGLA: Cobrar el valor más alto
-    const total = count > 0 ? Math.max(...selectedSabores.map(s => s.p)) : 0;
-    
-    document.getElementById('selection-text').innerText = `${count}/2 sabores`;
-    document.getElementById('total-price').innerText = `$${total.toLocaleString()}`;
-    document.getElementById('submit-order').disabled = count === 0;
-}
-
-function handleOrder() {
-    const dir = document.getElementById('direccion').value;
-    if (!dir) return alert("Por favor, ingresa tu dirección.");
-    
-    localStorage.setItem('user_dir', dir);
+async function handleOrder() {
+    const direccion = document.getElementById('direccion').value;
     const total = Math.max(...selectedSabores.map(s => s.p));
-    const sabores = selectedSabores.map(s => s.s).join(" con ");
     
-    const mensaje = `🍕 *USTARIZ PIZZA - NUEVO PEDIDO*\n\n` +
-                    `• *Tamaño:* ${currentSize}\n` +
-                    `• *Sabores:* ${sabores}\n` +
-                    `• *Total:* $${total.toLocaleString()}\n\n` +
-                    `📍 *Entrega:* ${dir}`;
-    
-    window.open(`https://wa.me/573000000000?text=${encodeURIComponent(mensaje)}`); // <--- Cambia tu número aquí
-}
+    // Este objeto DEBE coincidir con lo que lee tu Apps Script (data.sabores, data.tamaño, etc)
+    const datosParaEnvio = {
+        tamaño: activeSize,
+        sabores: selectedSabores.map(s => s.s), // Envía un Array
+        total: total,
+        direccion: direccion,
+        metodoPago: "WhatsApp" 
+    };
 
-init();
+    // 1. Enviar a Google Sheets
+    fetch('https://script.google.com/macros/s/AKfycbz6RBG675V3g5H5mn4HuOIXPg0TQXPLjrYDSOCUiuB6a-KwTjGyud9_Iw9LGiqT68n2/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(datosParaEnvio)
+    });
+
+    // 2. Formatear mensaje de WhatsApp
+    const saboresText = selectedSabores.map(s => s.s).join(" y ");
+    const mensaje = `🍕 *USTARIZ PIZZA*\n\nPedido: ${activeSize} de ${saboresText}\nTotal: $${total}\nDirección: ${direccion}`;
+    
+    window.open(`https://wa.me/57TU_NUMERO?text=${encodeURIComponent(mensaje)}`);
+}

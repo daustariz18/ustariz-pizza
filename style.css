@@ -1,8 +1,9 @@
 :root {
-    --accent: #7a332a;
-    --bg: #121212;
-    --card: #1e1e1e;
+    --accent: #7a332a; /* El tono marrón de tu marca */
+    --bg: #0d0d0d;
+    --card: #1a1a1a;
     --text: #ffffff;
+    --muted: #888888;
     --green: #25d366;
 }
 
@@ -11,50 +12,65 @@ body {
     background-color: var(--bg);
     color: var(--text);
     margin: 0;
-    padding-bottom: 160px;
+    padding-bottom: 180px; /* Espacio para que el carrito no tape el menú */
 }
 
+/* Encabezado con tu logo */
 header {
     text-align: center;
-    padding: 15px 0;
-    background: #000;
+    padding: 20px 0;
+    background: linear-gradient(to bottom, #1a1a1a, var(--bg));
 }
 
 .logo {
-    max-width: 80px;
+    max-width: 90px;
     border-radius: 50%;
+    border: 2px solid var(--accent);
 }
 
+/* Navegación de Tamaños (Personal, Small, etc.) */
 .tabs {
     display: flex;
     overflow-x: auto;
     padding: 10px;
-    gap: 8px;
+    gap: 10px;
     position: sticky;
     top: 0;
     background: var(--bg);
     z-index: 100;
+    scrollbar-width: none;
 }
 
 .tab-btn {
     background: var(--card);
     border: 1px solid #333;
-    padding: 8px 16px;
-    border-radius: 20px;
-    color: #888;
-    white-space: nowrap;
-    font-size: 0.8rem;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: var(--muted);
     font-weight: bold;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .tab-btn.active {
     background: var(--accent);
     color: white;
+    border-color: var(--accent);
 }
 
+.helper-text {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--accent);
+    padding: 5px;
+    font-weight: bold;
+}
+
+/* Cuadrícula de 3 columnas para tarjetas pequeñas */
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 tarjetas por fila */
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     padding: 10px;
 }
@@ -62,12 +78,11 @@ header {
 .pizza-card {
     background: var(--card);
     border-radius: 12px;
-    text-align: center;
     padding: 8px;
-    border: 1px solid transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: 0.2s;
+    cursor: pointer;
 }
 
 .pizza-card.selected {
@@ -75,45 +90,55 @@ header {
     background: #2a1515;
 }
 
+/* Ajuste para que la pizza salga completa */
 .pizza-img {
     width: 100%;
-    aspect-ratio: 1 / 1; /* Cuadrado perfecto */
-    object-fit: contain; /* Muestra la pizza completa sin recortes */
+    aspect-ratio: 1 / 1;
+    object-fit: contain; /* Evita que la imagen se recorte */
     margin-bottom: 5px;
 }
 
 .pizza-info h3 {
     margin: 0;
-    font-size: 0.65rem; /* Letra pequeña para que quepa el nombre */
+    font-size: 0.7rem;
     text-transform: uppercase;
-    min-height: 24px;
+    color: #eee;
 }
 
 .price {
     font-size: 0.75rem;
     color: var(--accent);
-    font-weight: bold;
+    font-weight: 800;
 }
 
-/* Panel inferior */
+/* Panel de Compra Inferior */
 .cart-panel {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background: #1a1a1a;
+    background: #151515;
     padding: 15px;
     box-sizing: border-box;
     border-radius: 20px 20px 0 0;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
+}
+
+.summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: bold;
 }
 
 #direccion {
     width: 100%;
     background: #000;
     border: 1px solid #333;
-    padding: 10px;
+    padding: 12px;
     color: white;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
 }
 
 .order-btn {
@@ -121,7 +146,16 @@ header {
     background: var(--green);
     color: white;
     border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.order-btn:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
 }
