@@ -101,12 +101,14 @@ body {
 
 /* FOOTER */
 .cart-panel {
-  position: fixed;
+  position: sticky;   /* 👈 CLAVE */
   bottom: 0;
   width: 100%;
   background: #181818;
   padding: 14px;
+  z-index: 50;
 }
+
 
 .summary {
   display: flex;
