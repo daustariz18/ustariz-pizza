@@ -1,43 +1,20 @@
-/*************************************************
- * CONFIGURACIÓN GENERAL
- *************************************************/
+const WHATSAPP_NUMBER = "573001234567"; // CAMBIA ESTO
 
-// 👉 URL de tu Apps Script (ventas)
-const VENTAS_API = 'https://script.google.com/macros/s/AKfycbz6RBG675V3g5H5mn4HuOIXPg0TQXPLjrYDSOCUiuB6a-KwTjGyud9_Iw9LGiqT68n2/exec';
-
-// 👉 Número de WhatsApp (formato internacional sin +)
-const WHATSAPP_NUMBER = '573001234567'; // CAMBIA ESTE NÚMERO
-
-
-/*************************************************
- * DICCIONARIO DE IMÁGENES
- *************************************************/
+/* ================= IMÁGENES (SEGÚN TU CARPETA REAL) ================= */
 const IMAGES = {
   "Salami": "img/salami.png",
-  "Jamon": "img/jamon.png",
-  "Pollo": "img/pollo.png",
+  "Jamon": "img/Jamon.png",
+  "Pollo": "img/Pollo.png",
   "Pepperoni": "img/pepperoni.png",
-  "Salami Pimenton": "img/salami-pimenton.png",
-  "Hawaiana": "img/hawaiana.png",
-  "Pollo Jamon": "img/jamon-pollo.png",
-  "3 Carnes": "img/3-carnes.png"
+  "Salami Pimenton": "img/Salami-Pimenton.png",
+  "Hawaiana": "img/Hawaiana.png",
+  "Pollo Jamon": "img/Jamon-Pollo.png",
+  "3 Carnes": "img/3-Carnes.png"
 };
 
-
-/*************************************************
- * DICCIONARIO DE PRECIOS
- *************************************************/
+/* ================= MENÚ ================= */
 const MENU = {
-  "Personal": {
-    "Salami": 20000,
-    "Jamon": 20000,
-    "Pollo": 20000,
-    "Pepperoni": 20000,
-    "Salami Pimenton": 20000,
-    "Hawaiana": 20000,
-    "Pollo Jamon": 20000,
-    "3 Carnes": 22000
-  },
+
   "Small": {
     "Salami": 28000,
     "Jamon": 28000,
@@ -80,135 +57,120 @@ const MENU = {
   }
 };
 
+/* ================= ESTADO ================= */
+let activeSize = "Small";
+let selected = [];
 
-/*************************************************
- * ESTADO DE LA APP
- *************************************************/
-let activeSize = "Personal";
-let selectedSabores = [];
+/* ================= TABS ================= */
+function renderTabs() {
+  const tabs = document.getElementById("tabs-bar");
+  tabs.innerHTML = "";
 
+  Object.keys(MENU).forEach(size => {
+    const btn = document.createElement("button");
+    btn.className = `tab-btn ${size === activeSize ? "active" : ""}`;
+    btn.textContent = size;
+    btn.onclick = () => {
+      activeSize = size;
+      selected = [];
+      updateSummary();
+      renderTabs();
+      renderMenu();
+    };
+    tabs.appendChild(btn);
+  });
+}
 
-/*************************************************
- * RENDER DEL MENÚ
- *************************************************/
+/* ================= MENÚ ================= */
 function renderMenu() {
   const grid = document.getElementById("menu-content");
-  if (!grid) return;
-
   grid.innerHTML = "";
 
   Object.entries(MENU[activeSize]).forEach(([sabor, precio]) => {
-    const isSelected = selectedSabores.includes(sabor);
-
     const card = document.createElement("div");
-    card.className = `pizza-card ${isSelected ? "selected" : ""}`;
+    card.className = `pizza-card ${selected.includes(sabor) ? "selected" : ""}`;
 
     card.innerHTML = `
-      <img src="${IMAGES[sabor]}" class="pizza-img" onerror="this.src='img/logo.png'">
-      <div class="pizza-info">
-        <h3>${sabor}</h3>
-        <span class="price">$${precio.toLocaleString()}</span>
+      <div class="pizza-image">
+        <img src="${IMAGES[sabor]}" alt="${sabor}" onerror="this.src='img/logo.png'">
+        <div class="overlay">
+          <h3>${sabor}</h3>
+          <span>$${precio.toLocaleString()}</span>
+        </div>
       </div>
     `;
 
-    card.onclick = () => toggleSabor(sabor);
+    card.onclick = () => toggleFlavor(sabor);
     grid.appendChild(card);
   });
 }
 
-
-/*************************************************
- * SELECCIÓN DE SABORES (máx 2)
- *************************************************/
-function toggleSabor(sabor) {
-  const index = selectedSabores.indexOf(sabor);
-
-  if (index >= 0) {
-    selectedSabores.splice(index, 1);
+/* ================= SELECCIÓN ================= */
+function toggleFlavor(sabor) {
+  if (selected.includes(sabor)) {
+    selected = selected.filter(s => s !== sabor);
   } else {
-    if (selectedSabores.length >= 2) {
-      alert("Solo puedes seleccionar hasta 2 sabores");
+    if (selected.length === 2) {
+      alert("Solo puedes elegir hasta 2 sabores");
       return;
     }
-    selectedSabores.push(sabor);
+    selected.push(sabor);
   }
-
-  actualizarResumen();
+  updateSummary();
   renderMenu();
 }
 
-
-/*************************************************
- * ACTUALIZAR PRECIO (cobra el mayor)
- *************************************************/
-function actualizarResumen() {
+/* ================= TOTAL ================= */
+function updateSummary() {
   const totalEl = document.getElementById("total-price");
+  const selectionEl = document.getElementById("selection-text");
+  const orderBtn = document.getElementById("submit-order");
 
-  if (selectedSabores.length === 0) {
-    totalEl.innerText = "$0";
+  // 1️⃣ Actualizar contador de sabores
+  selectionEl.textContent = `${selected.length}/2 sabores`;
+
+  // 2️⃣ Feedback visual (AQUÍ VA EL BLOQUE QUE PREGUNTAS)
+  if (selected.length === 2) {
+    selectionEl.style.color = "#25d366"; // verde cuando está completo
+  } else {
+    selectionEl.style.color = "white";
+  }
+
+  // 3️⃣ Si no hay sabores, resetear
+  if (selected.length === 0) {
+    totalEl.textContent = "$0";
+    orderBtn.disabled = true;
     return;
   }
 
-  const precios = selectedSabores.map(
-    sabor => MENU[activeSize][sabor]
-  );
+  // 4️⃣ Calcular total (se cobra el mayor)
+  const total = Math.max(...selected.map(s => MENU[activeSize][s]));
+  totalEl.textContent = `$${total.toLocaleString()}`;
 
-  const total = Math.max(...precios);
-  totalEl.innerText = `$${total.toLocaleString()}`;
+  // 5️⃣ Habilitar botón
+  orderBtn.disabled = false;
 }
 
 
-/*************************************************
- * ENVIAR PEDIDO
- *************************************************/
-async function handleOrder() {
-  const direccion = document.getElementById("direccion")?.value;
 
-  if (!direccion || selectedSabores.length === 0) {
-    alert("Selecciona al menos un sabor y escribe tu dirección");
+/* ================= PEDIDO ================= */
+function handleOrder() {
+  const dir = document.getElementById("direccion").value;
+  if (!dir || !selected.length) {
+    alert("Completa el pedido");
     return;
   }
 
-  const precios = selectedSabores.map(
-    sabor => MENU[activeSize][sabor]
-  );
-  const total = Math.max(...precios);
+  const total = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const msg =
+    `🍕 *USTARIZ PIZZA*\n\n` +
+    `${activeSize} de ${selected.join(" y ")}\n` +
+    `Total: $${total.toLocaleString()}\n` +
+    `Dirección: ${dir}`;
 
-  const datosParaEnvio = {
-    tamaño: activeSize,
-    sabores: selectedSabores,
-    total: total,
-    direccion: direccion,
-    metodoPago: "WhatsApp"
-  };
-
-  try {
-    // 👉 Guardar en Google Sheets
-    fetch(VENTAS_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datosParaEnvio)
-    });
-
-    // 👉 Mensaje WhatsApp
-    const saboresText = selectedSabores.join(" y ");
-    const mensaje =
-      `🍕 *USTARIZ PIZZA*\n\n` +
-      `*Pedido:* ${activeSize} de ${saboresText}\n` +
-      `*Total:* $${total.toLocaleString()}\n` +
-      `*Dirección:* ${direccion}`;
-
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
-    );
-
-  } catch (err) {
-    console.error("Error al procesar el pedido:", err);
-  }
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
 }
 
-
-/*************************************************
- * INICIALIZAR
- *************************************************/
+/* ================= INIT ================= */
+renderTabs();
 renderMenu();
