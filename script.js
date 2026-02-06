@@ -151,25 +151,37 @@ function updateSummary() {
   orderBtn.disabled = false;
 }
 
-
-
 /* ================= PEDIDO ================= */
 function handleOrder() {
   const dir = document.getElementById("direccion").value;
-  if (!dir || !selected.length) {
+
+  if (!dir || selected.length === 0) {
     alert("Completa el pedido");
     return;
   }
 
   const total = Math.max(...selected.map(s => MENU[activeSize][s]));
+
+  let descripcion = "";
+
+  if (selected.length === 2) {
+    descripcion = `${activeSize} 1/2 de ${selected[0]} 1/2 de ${selected[1]}`;
+  } else {
+    descripcion = `${activeSize} de ${selected[0]}`;
+  }
+
   const msg =
     `🍕 *USTARIZ PIZZA*\n\n` +
-    `${activeSize} de ${selected.join(" y ")}\n` +
-    `Total: $${total.toLocaleString()}\n` +
-    `Dirección: ${dir}`;
+    `📦 *Pedido:* ${descripcion}\n` +
+    `💰 *Total:* $${total.toLocaleString()}\n` +
+    `📍 *Dirección:* ${dir}`;
 
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
+  window.open(
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+    "_blank"
+  );
 }
+
 
 /* ================= INIT ================= */
 renderTabs();

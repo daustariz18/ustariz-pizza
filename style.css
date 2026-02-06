@@ -143,31 +143,66 @@ header {
   text-align: center;
 }
 
+/* ================= HEADER / FRANJA ================= */
 .top-bar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 56px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: linear-gradient(180deg, #1a1a1a, #121212);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 14px;
+
+  height: 68px;
+  padding: 0 16px;
+
+  background: linear-gradient(180deg, #1b1b1b, #121212);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
 }
 
+/* LOGO */
 .logo {
-  height: 36px;
+  height: 48px;       /* MÁS GRANDE, PERO CONTROLADO */
   width: auto;
+  flex-shrink: 0;
 }
 
+/* TEXTO DE MARCA */
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+/* NOMBRE */
 .brand-name {
+  font-size: 1.2rem;
   font-weight: 900;
-  letter-spacing: .5px;
-  font-size: 1rem;
-  color: white;
+  letter-spacing: 0.6px;
+  color: #ffffff;
 }
 
-.top-bar {
-  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+/* SUBTEXTO */
+.brand-tagline {
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #f4a261;
+  opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .top-bar {
+    height: 62px;
+  }
+
+  .logo {
+    height: 44px;
+  }
+
+  .brand-name {
+    font-size: 1.1rem;
+  }
 }
