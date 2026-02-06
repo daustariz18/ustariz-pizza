@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "573001234567"; // CAMBIA ESTO
+const WHATSAPP_NUMBER = "573001720582"; // CAMBIA ESTO
 
 /* ================= IMÁGENES (SEGÚN TU CARPETA REAL) ================= */
 const IMAGES = {
