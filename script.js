@@ -1,6 +1,6 @@
-const WHATSAPP_NUMBER = "573001720582"; // CAMBIA ESTO
+const WHATSAPP_NUMBER = "573001720582";
 
-/* ================= IMÁGENES (SEGÚN TU CARPETA REAL) ================= */
+/* ================= IMÁGENES ================= */
 const IMAGES = {
   "Salami": "img/salami.png",
   "Jamon": "img/Jamon.png",
@@ -14,7 +14,6 @@ const IMAGES = {
 
 /* ================= MENÚ ================= */
 const MENU = {
-
   "Small": {
     "Salami": 28000,
     "Jamon": 28000,
@@ -57,9 +56,30 @@ const MENU = {
   }
 };
 
+/* ================= DOMICILIOS ================= */
+const BARRIOS = {
+  "Miramar": 5000,
+  "El Tabor": 6000,
+  "Alameda del Rio": 8000,
+  "Buenavista": 8000,
+  "Villa Santos": 6000,
+  "Villa Campestre": 10000
+};
+
 /* ================= ESTADO ================= */
 let activeSize = "Small";
 let selected = [];
+
+/* ================= BARRIOS ================= */
+function loadBarrios() {
+  const select = document.getElementById("barrio");
+  Object.entries(BARRIOS).forEach(([barrio, valor]) => {
+    const opt = document.createElement("option");
+    opt.value = barrio;
+    opt.textContent = `${barrio} (+$${valor.toLocaleString()})`;
+    select.appendChild(opt);
+  });
+}
 
 /* ================= TABS ================= */
 function renderTabs() {
@@ -125,56 +145,52 @@ function updateSummary() {
   const totalEl = document.getElementById("total-price");
   const selectionEl = document.getElementById("selection-text");
   const orderBtn = document.getElementById("submit-order");
+  const barrio = document.getElementById("barrio").value;
 
-  // 1️⃣ Actualizar contador de sabores
   selectionEl.textContent = `${selected.length}/2 sabores`;
+  selectionEl.style.color = selected.length === 2 ? "#25d366" : "white";
 
-  // 2️⃣ Feedback visual (AQUÍ VA EL BLOQUE QUE PREGUNTAS)
-  if (selected.length === 2) {
-    selectionEl.style.color = "#25d366"; // verde cuando está completo
-  } else {
-    selectionEl.style.color = "white";
-  }
-
-  // 3️⃣ Si no hay sabores, resetear
-  if (selected.length === 0) {
+  if (selected.length === 0 || !barrio) {
     totalEl.textContent = "$0";
     orderBtn.disabled = true;
     return;
   }
 
-  // 4️⃣ Calcular total (se cobra el mayor)
-  const total = Math.max(...selected.map(s => MENU[activeSize][s]));
-  totalEl.textContent = `$${total.toLocaleString()}`;
+  const pizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const domicilio = BARRIOS[barrio];
+  const total = pizza + domicilio;
 
-  // 5️⃣ Habilitar botón
+  totalEl.textContent = `$${total.toLocaleString()}`;
   orderBtn.disabled = false;
 }
 
 /* ================= PEDIDO ================= */
 function handleOrder() {
   const dir = document.getElementById("direccion").value;
+  const barrio = document.getElementById("barrio").value;
 
-  if (!dir || selected.length === 0) {
+  if (!dir || !barrio || selected.length === 0) {
     alert("Completa el pedido");
     return;
   }
 
-  const total = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const pizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const domicilio = BARRIOS[barrio];
+  const total = pizza + domicilio;
 
-  let descripcion = "";
-
-  if (selected.length === 2) {
-    descripcion = `${activeSize} 1/2 de ${selected[0]} 1/2 de ${selected[1]}`;
-  } else {
-    descripcion = `${activeSize} de ${selected[0]}`;
-  }
+  const descripcion =
+    selected.length === 2
+      ? `${activeSize} 1/2 de ${selected[0]} 1/2 de ${selected[1]}`
+      : `${activeSize} de ${selected[0]}`;
 
   const msg =
-    `🍕 *USTARIZ PIZZA*\n\n` +
-    `📦 *Pedido:* ${descripcion}\n` +
-    `💰 *Total:* $${total.toLocaleString()}\n` +
-    `📍 *Dirección:* ${dir}`;
+`🍕 *USTARIZ PIZZA*
+
+📦 *Pedido:* ${descripcion}
+🏘️ *Barrio:* ${barrio}
+🚚 *Domicilio:* $${domicilio.toLocaleString()}
+💰 *Total:* $${total.toLocaleString()}
+📍 *Dirección:* ${dir}`;
 
   window.open(
     `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
@@ -182,8 +198,7 @@ function handleOrder() {
   );
 }
 
-
 /* ================= INIT ================= */
+loadBarrios();
 renderTabs();
 renderMenu();
-

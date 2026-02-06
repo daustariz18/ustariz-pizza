@@ -1,43 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ustariz Pizza | Menú Digital</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ustariz Pizza | Menú Digital</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header class="top-bar">
-        <img src="img/logo_IA_Ustariz_Pizza.png" alt="Ustariz Pizza" class="logo">
-        <div class="brand-text">
-            <span class="brand-name">Ustariz Pizza</span>
-            <span class="brand-tagline">Pizza artesanal al horno</span>
-        </div>
-    </header>
+  <!-- ================= HEADER ================= -->
+  <header class="top-bar">
+    <img src="img/logo_IA_Ustariz_Pizza.png" alt="Ustariz Pizza" class="logo">
+    <div class="brand-text">
+      <span class="brand-name">Ustariz Pizza</span>
+      <span class="brand-tagline">Pizza artesanal al horno</span>
+    </div>
+  </header>
 
-    <nav class="tabs" id="tabs-bar"></nav>
+  <!-- ================= TAMAÑOS ================= -->
+  <nav class="tabs" id="tabs-bar"></nav>
 
-    <div class="helper-text">
-        <p>Selecciona hasta 2 sabores (se cobrará el de mayor valor)</p>
+  <!-- ================= AYUDA ================= -->
+  <div class="helper-text">
+    <p>Selecciona hasta 2 sabores (se cobrará el de mayor valor)</p>
+  </div>
+
+  <!-- ================= MENÚ ================= -->
+  <main class="menu-grid" id="menu-content"></main>
+
+  <!-- ================= CARRITO ================= -->
+  <footer class="cart-panel">
+
+    <div class="summary">
+      <span id="selection-text">0/2 sabores</span>
+      <span id="total-price">$0</span>
     </div>
 
-    <main class="menu-grid" id="menu-content"></main>
+    <!-- BARRIOS -->
+    <select id="barrio" class="barrio-select">
+      <option value="">📍 Selecciona tu barrio</option>
+    </select>
 
-    <footer class="cart-panel">
-        <div class="summary">
-            <span id="selection-text">0/2 sabores</span>
-            <span id="total-price">$0</span>
-        </div>
-        
-        <input type="text" id="direccion" placeholder="📍 Tu dirección y barrio" required>
-        
-        <button class="order-btn" id="submit-order" disabled onclick="handleOrder()">
-            CONFIRMAR PEDIDO POR WHATSAPP
-        </button>
-    </footer>
+    <!-- DIRECCIÓN -->
+    <input
+      type="text"
+      id="direccion"
+      placeholder="🏠 Dirección exacta (casa / apto)"
+      required
+    >
 
-    <script src="script.js"></script>
+    <!-- BOTÓN -->
+    <button
+      class="order-btn"
+      id="submit-order"
+      disabled
+      onclick="handleOrder()"
+    >
+      CONFIRMAR PEDIDO POR WHATSAPP
+    </button>
+
+  </footer>
+
+  <!-- ================= SCRIPT ================= -->
+  <script src="script.js"></script>
+
 </body>
 </html>
