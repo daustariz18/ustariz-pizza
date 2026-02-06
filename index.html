@@ -30,15 +30,10 @@
   <!-- ================= MENÚ ================= -->
   <main class="menu-grid" id="menu-content"></main>
 
-  <!-- ================= CARRITO ================= -->
-  <footer class="cart-panel">
+  <!-- ================= FORMULARIO PEDIDO ================= -->
+  <section class="order-form">
 
-    <div class="summary">
-      <span id="selection-text">0/2 sabores</span>
-      <span id="total-price">$0</span>
-    </div>
-
-    <!-- BARRIOS -->
+    <!-- BARRIO -->
     <select id="barrio" class="barrio-select">
       <option value="">📍 Selecciona tu barrio</option>
     </select>
@@ -51,7 +46,16 @@
       required
     >
 
-    <!-- BOTÓN -->
+  </section>
+
+  <!-- ================= CARRITO FIJO ================= -->
+  <footer class="cart-panel">
+
+    <div class="summary">
+      <span id="selection-text">0/2 sabores</span>
+      <span id="total-price">$0</span>
+    </div>
+
     <button
       class="order-btn"
       id="submit-order"
