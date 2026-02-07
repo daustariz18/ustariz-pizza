@@ -342,3 +342,12 @@ body {
 .flavor-selection-container {
   padding: 20px 16px;
 }
+
+@media (min-width: 768px) {
+  .tabs-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* En computadoras, volver al diseño automático */
+  .menu-grid { 
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+  }
+}
