@@ -248,9 +248,11 @@ function handleOrder() {
 📍 *Dirección:* ${direccion}
 ${indicaciones ? "ℹ️ *Notas:* " + indicaciones : ""}
 💳 *Pago:* ${pago}
-💰 *TOTAL:* $${total.toLocaleString()}
+🍕 *Valor Pizza:* ${precioPizza.toLocaleString()}
+🛵 *Domicilio:* ${domicilio.toLocaleString()}
+💰 *TOTAL:* ${total.toLocaleString()}
 
-📞 *Tel:* ${telefono}
+📞 *Tel de Contacto:* ${telefono}
   `.trim();
 
   window.open(
