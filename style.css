@@ -141,10 +141,11 @@ body {
 }
 
 /* ================= MENÚ GRID ================= */
+/* Esto obliga a que siempre haya 2 columnas en celulares */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 14px;
+  grid-template-columns: 1fr 1fr; /* Cambiado de minmax a dos fracciones fijas */
+  gap: 12px;
   padding: 16px;
 }
 
@@ -344,10 +345,12 @@ body {
 }
 
 @media (min-width: 768px) {
-  .tabs-grid { grid-template-columns: repeat(4, 1fr); }
+  .tabs-grid { 
+    grid-template-columns: repeat(4, 1fr); 
+  }
 
-  /* En computadoras, volver al diseño automático */
+  /* En pantallas grandes (PC/Tablets), volvemos a un diseño que quepan más */
   .menu-grid { 
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
   }
 }
