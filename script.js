@@ -1,5 +1,12 @@
 const WHATSAPP_NUMBER = "573001720582";
 
+/* Objeto con los números de cuenta para asociar al pago */
+const CUENTAS_PAGO = {
+  "Nequi": "3007014434",
+  "Daviplata": "3128896624",
+  "Efectivo": "Efectivo"
+};
+
 /* Objeto con los mensajes de recomendación */
 const RECO_MESSAGES = {
   "Small": "Ideal para 1 - 2 personas",
@@ -23,44 +30,44 @@ const IMAGES = {
 /* ================= MENÚ ================= */
 const MENU = {
   "Small": {
-    "Salami": 28000,
-    "Jamon": 28000,
-    "Pollo": 29000,
-    "Pepperoni": 30000,
-    "Salami Pimenton": 28000,
-    "Hawaiana": 30000,
-    "Pollo Jamon": 30000,
-    "3 Carnes": 32000
+    "Salami": 30000,
+    "Jamon": 30000,
+    "Pollo": 30000,
+    "Pepperoni": 32000,
+    "Salami Pimenton": 30000,
+    "Hawaiana": 32000,
+    "Pollo Jamon": 32000,
+    "3 Carnes": 34000
   },
   "Medium": {
-    "Salami": 38000,
-    "Jamon": 38000,
-    "Pollo": 39000,
-    "Pepperoni": 40000,
-    "Salami Pimenton": 38000,
-    "Hawaiana": 40000,
-    "Pollo Jamon": 40000,
-    "3 Carnes": 42000
+    "Salami": 40000,
+    "Jamon": 40000,
+    "Pollo": 40000,
+    "Pepperoni": 42000,
+    "Salami Pimenton": 40000,
+    "Hawaiana": 42000,
+    "Pollo Jamon": 42000,
+    "3 Carnes": 44000
   },
   "Large": {
-    "Salami": 48000,
-    "Jamon": 48000,
-    "Pollo": 49000,
-    "Pepperoni": 50000,
-    "Salami Pimenton": 48000,
-    "Hawaiana": 50000,
-    "Pollo Jamon": 50000,
-    "3 Carnes": 52000
+    "Salami": 50000,
+    "Jamon": 50000,
+    "Pollo": 50000,
+    "Pepperoni": 52000,
+    "Salami Pimenton": 50000,
+    "Hawaiana": 52000,
+    "Pollo Jamon": 52000,
+    "3 Carnes": 54000
   },
   "X-Large": {
-    "Salami": 58000,
-    "Jamon": 58000,
-    "Pollo": 59000,
-    "Pepperoni": 60000,
-    "Salami Pimenton": 58000,
-    "Hawaiana": 60000,
-    "Pollo Jamon": 60000,
-    "3 Carnes": 62000
+    "Salami": 60000,
+    "Jamon": 60000,
+    "Pollo": 60000,
+    "Pepperoni": 62000,
+    "Salami Pimenton": 60000,
+    "Hawaiana": 62000,
+    "Pollo Jamon": 62000,
+    "3 Carnes": 64000
   }
 };
 
@@ -223,42 +230,39 @@ function handleOrder() {
   const barrio = document.getElementById("barrio").value;
   const direccion = document.getElementById("direccion_principal").value;
   const indicaciones = document.getElementById("indicaciones").value;
-  const pago = document.getElementById("metodo-pago").value;
+  const pagoKey = document.getElementById("metodo-pago").value;
 
-  // Lógica para formatear la descripción del pedido
-  let saboresTexto = "";
-  if (selected.length === 2) {
-    saboresTexto = `1/2 ${selected[0]} y 1/2 ${selected[1]}`;
-  } else {
-    saboresTexto = selected[0];
-  }
-
-  // Combinación solicitada: Tamaño + Sabores
+  // Lógica de sabores
+  let saboresTexto = selected.length === 2 ? `1/2 ${selected[0]} y 1/2 ${selected[1]}` : selected[0];
   const pedidoDetalle = `${activeSize} ${saboresTexto}`;
 
+  // Cálculos
   const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
   const domicilio = BARRIOS[barrio] || 0;
   const total = precioPizza + domicilio;
 
+  // Asociación de número de pago
+  const infoPago = CUENTAS_PAGO[pagoKey];
+  const lineaPago = (pagoKey === "Nequi" || pagoKey === "Daviplata") 
+                    ? `${pagoKey} (Transferir a: ${infoPago})` 
+                    : pagoKey;
+
   const msg = `
-🍕 *NUEVO PEDIDO - USTARIZ PIZZA*
---------------------------
-📦 *Pedido:* ${pedidoDetalle}
-🏘️ *Barrio:* ${barrio}
-📍 *Dirección:* ${direccion}
-${indicaciones ? "ℹ️ *Notas:* " + indicaciones : ""}
-💳 *Pago:* ${pago}
-🍕 *Valor Pizza:* ${precioPizza.toLocaleString()}
-🛵 *Domicilio:* ${domicilio.toLocaleString()}
-💰 *TOTAL:* ${total.toLocaleString()}
+  🍕 *NUEVO PEDIDO - USTARIZ PIZZA*
+  ----------------------------------
+  📦 *Pedido:* ${pedidoDetalle}
+  🏘️ *Barrio:* ${barrio}
+  📍 *Dirección:* ${direccion}
+  ${indicaciones ? "ℹ️ *Notas:* " + indicaciones : ""}
+  💳 *Pago:* ${lineaPago}
+  🍕 *Valor Pizza:* $${precioPizza.toLocaleString()}
+  🛵 *Domicilio:* $${domicilio.toLocaleString()}
+  💰 *TOTAL:* $${total.toLocaleString()}
 
-📞 *Tel de Contacto:* ${telefono}
-  `.trim();
+  📞 *Tel de Contacto:* ${telefono}
+    `.trim();
 
-  window.open(
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
-    "_blank"
-  );
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
 /* ================= INIT ================= */
