@@ -337,3 +337,8 @@ body {
   display: block;
   margin-bottom: 4px;
 }
+
+/* Agrega esto en style.css */
+.flavor-selection-container {
+  padding: 20px 16px;
+}
