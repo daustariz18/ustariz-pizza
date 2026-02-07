@@ -10,7 +10,6 @@
 </head>
 <body>
 
-  <!-- ================= HEADER ================= -->
   <header class="top-bar">
     <img src="img/logo_IA_Ustariz_Pizza.png" alt="Ustariz Pizza" class="logo">
     <div class="brand-text">
@@ -19,38 +18,48 @@
     </div>
   </header>
 
-  <!-- ================= TAMAÑOS ================= -->
-  <nav class="tabs" id="tabs-bar"></nav>
+  <section class="size-selector-container">
+    <div class="step-header">
+      <span class="step-badge">1</span>
+      <h2 class="step-text">Elige el tamaño</h2>
+    </div>
+    
+    <div class="tabs-grid" id="tabs-bar"></div>
 
-  <!-- ================= AYUDA ================= -->
-  <div class="helper-text">
-    <p>Selecciona hasta 2 sabores (se cobrará el de mayor valor)</p>
-  </div>
-
-  <!-- ================= MENÚ ================= -->
-  <main class="menu-grid" id="menu-content"></main>
-
-  <!-- ================= FORMULARIO PEDIDO ================= -->
-  <section class="order-form">
-
-    <!-- BARRIO -->
-    <select id="barrio" class="barrio-select">
-      <option value="">📍 Selecciona tu barrio</option>
-    </select>
-
-    <!-- DIRECCIÓN -->
-    <input
-      type="text"
-      id="direccion"
-      placeholder="🏠 Dirección exacta (casa / apto)"
-      required
-    >
-
+    <div id="size-recommendation-label" class="size-reco-label"></div>
   </section>
 
-  <!-- ================= CARRITO FIJO ================= -->
-  <footer class="cart-panel">
+  <section class="flavor-selection-container">
+    <div class="step-title">
+      <h2>Elige hasta 2 sabores</h2>
+    </div>
 
+    <main class="menu-grid" id="menu-content"></main>
+  </section>
+
+  <section class="order-form">
+    <div class="step-header">
+      <span class="step-badge">3</span>
+      <h2 class="step-text">Datos de entrega</h2>
+    </div>
+
+    <div class="form-group">
+      <input type="tel" id="telefono" placeholder="📞 Teléfono" class="input-field">
+      <input type="text" id="direccion_principal" placeholder="🏠 Conjunto o Dirección (Ej: Calle 100 #50)" class="input-field">
+
+      <div class="address-grid">
+        <input type="text" id="torre" placeholder="🔢 Torre/Bloque" class="input-field">
+        <input type="text" id="apto" placeholder="🚪 Apto/Casa #" class="input-field">
+      </div>
+      
+      <input type="text" id="indicaciones" placeholder="ℹ️ Notas (Ej: Dejar en portería)" class="input-field">
+      <select id="barrio" class="input-field" onchange="updateSummary()">
+        <option value="">📍 Selecciona tu barrio</option>
+      </select>
+    </div>
+  </section>
+
+  <footer class="cart-panel">
     <div class="summary">
       <span id="selection-text">0/2 sabores</span>
       <span id="total-price">$0</span>
@@ -64,10 +73,8 @@
     >
       CONFIRMAR PEDIDO POR WHATSAPP
     </button>
-
   </footer>
 
-  <!-- ================= SCRIPT ================= -->
   <script src="script.js"></script>
 
 </body>

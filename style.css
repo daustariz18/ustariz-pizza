@@ -2,7 +2,7 @@
   --bg: #121212;
   --card: #1f1f1f;
   --accent: #e63946;
-  --price: #f4a261;
+  --price: #f4a261; /* Este es tu color naranja */
   --text: #ffffff;
   --green: #25d366;
 }
@@ -16,62 +16,156 @@ body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding-bottom: 180px;
+  padding-bottom: 120px; /* Ajustado para el carrito */
 }
 
-/* TABS */
-.tabs {
+/* ================= HEADER / TOP BAR ================= */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   display: flex;
-  gap: 10px;
-  padding: 12px;
-  overflow-x: auto;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 68px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, #1b1b1b, #121212);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
 }
 
-.tab-btn {
-  background: #222;
-  color: #ccc;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-weight: 700;
-  cursor: pointer;
+.logo {
+  height: 48px;
+  width: auto;
+  flex-shrink: 0;
 }
 
-.tab-btn.active {
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #ffffff;
+}
+
+.brand-tagline {
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--price);
+  opacity: 0.9;
+}
+
+/* ================= SECCIÓN TAMAÑOS ================= */
+.size-selector-container {
+  padding: 20px 16px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.step-badge {
   background: var(--accent);
   color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.85rem;
 }
 
-/* GRID */
+.step-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Tarjeta de Tamaño */
+.tab-btn {
+  background: var(--card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  padding: 18px 14px !important;
+  text-align: left !important;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text);
+}
+
+/* CORRECCIÓN: Ahora el estado activo es naranja */
+.tab-btn.active {
+  border-color: var(--price) !important; /* Cambiado de --accent a --price */
+  background: linear-gradient(145deg, #2a2a2a, #1f1f1f) !important;
+  box-shadow: 0 4px 15px rgba(244, 162, 97, 0.25) !important; /* Resplandor naranja */
+  transform: translateY(-2px);
+}
+
+.size-name {
+  font-weight: 900;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.size-info {
+  color: #888;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+/* CORRECCIÓN: El texto del nombre también cambia a naranja */
+.tab-btn.active .size-name {
+  color: var(--price); /* Cambiado de --accent a --price */
+}
+
+/* ================= MENÚ GRID ================= */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 14px;
-  padding: 14px;
+  padding: 16px;
 }
 
-/* CARD */
 .pizza-card {
   background: var(--card);
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: transform .15s;
-}
-
-.pizza-card:hover {
-  transform: translateY(-4px);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .pizza-card.selected {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--price); /* Cambiado de --accent (rojo) a --price (naranja) */
+  box-shadow: 0 0 15px rgba(244, 162, 97, 0.4); /* Resplandor naranja sutil */
+  transform: scale(1.02); /* Efecto visual de elevación */
 }
 
-/* IMAGE */
 .pizza-image {
   position: relative;
   aspect-ratio: 1 / 1;
-  overflow: hidden;
 }
 
 .pizza-image img {
@@ -80,142 +174,139 @@ body {
   object-fit: cover;
 }
 
-/* OVERLAY */
 .overlay {
   position: absolute;
   bottom: 0;
   width: 100%;
-  padding: 10px;
-  background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
+  padding: 12px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
 }
 
 .overlay h3 {
   margin: 0;
-  font-size: .8rem;
+  font-size: .85rem;
+  font-weight: 700;
 }
 
 .overlay span {
   color: var(--price);
   font-weight: 800;
+  font-size: 0.9rem;
 }
 
-/* FOOTER */
+/* ================= FORMULARIO CORREGIDO ================= */
+/* Contenedor principal del formulario */
+.order-form {
+  padding: 20px 16px;
+  background: var(--bg);
+}
+
+/* Espaciado vertical entre filas */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Espacio uniforme entre cada campo */
+}
+
+/* Estilo unificado para todos los inputs */
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  color: #333333;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--price); /* Resalte naranja al escribir */
+  outline: none;
+}
+
+/* El Grid para Torre y Apto */
+.address-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+  gap: 12px;
+}
+
+/* MEJORA UX: Recomendación de tamaño en blanco */
+.size-reco-label {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(244, 162, 97, 0.15); /* Fondo naranja sutil */
+  border-left: 4px solid var(--price);
+  border-radius: 8px;
+  color: #ffffff !important; /* Texto blanco para legibilidad */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* ================= FOOTER / CARRITO ================= */
 .cart-panel {
-  position: sticky;   /* 👈 CLAVE */
+  position: fixed;
   bottom: 0;
   width: 100%;
   background: #181818;
-  padding: 14px;
-  z-index: 50;
+  padding: 16px;
+  z-index: 2000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
 }
-
 
 .summary {
   display: flex;
   justify-content: space-between;
   font-weight: 700;
-}
-
-#direccion {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
+  margin-bottom: 12px;
 }
 
 .order-btn {
-  margin-top: 10px;
   width: 100%;
   background: var(--green);
   color: white;
-  padding: 14px;
+  padding: 16px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
-/* HEADER / LOGO */
-header {
-  position: sticky;
-  top: 0;
-  background: #121212;
-  padding: 8px 0;
-  z-index: 100;
-  text-align: center;
+.order-btn:disabled {
+  background: #444;
+  opacity: 0.6;
 }
 
-/* ================= HEADER / FRANJA ================= */
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-
-  height: 68px;
-  padding: 0 16px;
-
-  background: linear-gradient(180deg, #1b1b1b, #121212);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 6px 24px rgba(0,0,0,.35);
-}
-
-/* LOGO */
-.logo {
-  height: 48px;       /* MÁS GRANDE, PERO CONTROLADO */
-  width: auto;
-  flex-shrink: 0;
-}
-
-/* TEXTO DE MARCA */
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-
-/* NOMBRE */
-.brand-name {
-  font-size: 1.2rem;
-  font-weight: 900;
-  letter-spacing: 0.6px;
-  color: #ffffff;
-}
-
-/* SUBTEXTO */
-.brand-tagline {
-  font-size: 0.65rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: #f4a261;
-  opacity: 0.9;
+/* ================= MEDIA QUERIES ================= */
+@media (min-width: 768px) {
+  .tabs-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 480px) {
-  .top-bar {
-    height: 62px;
-  }
-
-  .logo {
-    height: 44px;
-  }
-
-  .brand-name {
-    font-size: 1.1rem;
-  }
+  .top-bar { height: 62px; }
+  .logo { height: 44px; }
+  .brand-name { font-size: 1.1rem; }
 }
 
-.barrio-select {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  font-size: 0.95rem;
-  background: #ffffff;
-  color: #333;
+/* ================= ETIQUETA DE RECOMENDACIÓN MEJORADA ================= */
+.size-reco-label {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background: rgba(244, 162, 97, 0.15); /* Fondo naranja muy suave para dar contexto */
+  border-left: 4px solid var(--price);  /* Mantiene la línea naranja para identidad visual */
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #ffffff;                       /* TEXTO EN BLANCO: Mejora drásticamente el contraste */
+  font-weight: 600;
+  display: none; 
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

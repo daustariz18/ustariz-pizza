@@ -1,5 +1,13 @@
 const WHATSAPP_NUMBER = "573001720582";
 
+/* Objeto con los mensajes de recomendación */
+const RECO_MESSAGES = {
+  "Small": "Ideal para 1 - 2 personas",
+  "Medium": "Ideal para 2 - 3 personas",
+  "Large": "Ideal para 3 - 4 personas",
+  "X-Large": "Ideal para 4 - 5 personas"
+};
+
 /* ================= IMÁGENES ================= */
 const IMAGES = {
   "Salami": "img/salami.png",
@@ -58,6 +66,7 @@ const MENU = {
 
 /* ================= DOMICILIOS ================= */
 const BARRIOS = {
+  "Balcones del Mar":0,
   "Miramar": 5000,
   "El Tabor": 6000,
   "Alameda del Rio": 8000,
@@ -81,20 +90,38 @@ function loadBarrios() {
   });
 }
 
-/* ================= TABS ================= */
 function renderTabs() {
   const tabs = document.getElementById("tabs-bar");
+  const recoLabel = document.getElementById("size-recommendation-label"); // Referencia a la nueva label
+  
   tabs.innerHTML = "";
+
+  // Actualizar el texto de la recomendación según el activeSize
+  if (activeSize) {
+    recoLabel.innerHTML = `👥 ${RECO_MESSAGES[activeSize]}`;
+    recoLabel.style.display = "block";
+  }
 
   Object.keys(MENU).forEach(size => {
     const btn = document.createElement("button");
     btn.className = `tab-btn ${size === activeSize ? "active" : ""}`;
-    btn.textContent = size;
+    
+    // Usamos la estructura informativa de Salvatore
+    const infoExtra = size === "Small" ? "(8 Porciones)" : 
+                      size === "Medium" ? "(8 Porciones.)" : 
+                      size === "Large" ? "(8 Porciones.)" :
+                      size === "X-Large" ? "(10 Porciones.)" : "(10 Porc.)";
+
+    btn.innerHTML = `
+      <span class="size-name">${size}</span>
+      <span class="size-info">${infoExtra}</span>
+    `;
+
     btn.onclick = () => {
       activeSize = size;
       selected = [];
       updateSummary();
-      renderTabs();
+      renderTabs(); // Esto actualizará la label automáticamente
       renderMenu();
     };
     tabs.appendChild(btn);
@@ -141,63 +168,63 @@ function toggleFlavor(sabor) {
 }
 
 /* ================= TOTAL ================= */
+/* ================= TOTAL CORREGIDO ================= */
 function updateSummary() {
   const totalEl = document.getElementById("total-price");
   const selectionEl = document.getElementById("selection-text");
   const orderBtn = document.getElementById("submit-order");
-  const barrio = document.getElementById("barrio").value;
+  const barrioKey = document.getElementById("barrio").value;
+  
+  // CORRECCIÓN: Usar el ID correcto del HTML
+  const direccion = document.getElementById("direccion_principal").value;
 
   selectionEl.textContent = `${selected.length}/2 sabores`;
-  selectionEl.style.color = selected.length === 2 ? "#25d366" : "white";
+  selectionEl.style.color = selected.length > 0 ? "var(--price)" : "white";
 
-  if (selected.length === 0 || !barrio) {
+  if (selected.length === 0) {
     totalEl.textContent = "$0";
     orderBtn.disabled = true;
     return;
   }
 
-  const pizza = Math.max(...selected.map(s => MENU[activeSize][s]));
-  const domicilio = BARRIOS[barrio];
-  const total = pizza + domicilio;
+  const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const precioDomicilio = barrioKey ? BARRIOS[barrioKey] : 0;
+  const totalFinal = precioPizza + precioDomicilio;
 
-  totalEl.textContent = `$${total.toLocaleString()}`;
-  orderBtn.disabled = false;
+  totalEl.textContent = `$${totalFinal.toLocaleString()}`;
+
+  // Se activa si hay sabores, barrio y dirección
+  orderBtn.disabled = !(selected.length > 0 && barrioKey && direccion);
 }
 
 /* ================= PEDIDO ================= */
 function handleOrder() {
-  const dir = document.getElementById("direccion").value;
+  const dirPrincipal = document.getElementById("direccion_principal").value;
+  const torre = document.getElementById("torre").value;
+  const apto = document.getElementById("apto").value;
   const barrio = document.getElementById("barrio").value;
+  const notas = document.getElementById("indicaciones").value;
 
-  if (!dir || !barrio || selected.length === 0) {
-    alert("Completa el pedido");
-    return;
-  }
-
-  const pizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const pizzaPrecio = Math.max(...selected.map(s => MENU[activeSize][s]));
   const domicilio = BARRIOS[barrio];
-  const total = pizza + domicilio;
+  const total = pizzaPrecio + domicilio;
 
-  const descripcion =
-    selected.length === 2
-      ? `${activeSize} 1/2 de ${selected[0]} 1/2 de ${selected[1]}`
+  const descripcion = selected.length === 2
+      ? `${activeSize} (1/2 ${selected[0]} - 1/2 ${selected[1]})`
       : `${activeSize} de ${selected[0]}`;
 
-  const msg =
-`🍕 *USTARIZ PIZZA*
-
+  const msg = `🍕 *USTARIZ PIZZA*
+--------------------------
 📦 *Pedido:* ${descripcion}
 🏘️ *Barrio:* ${barrio}
+📍 *Dirección:* ${dirPrincipal} ${torre ? '- T:'+torre : ''} ${apto ? '- Apt:'+apto : ''}
+ℹ️ *Notas:* ${notas || 'Ninguna'}
+--------------------------
 🚚 *Domicilio:* $${domicilio.toLocaleString()}
-💰 *Total:* $${total.toLocaleString()}
-📍 *Dirección:* ${dir}`;
+💰 *TOTAL:* $${total.toLocaleString()}`;
 
-  window.open(
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
-    "_blank"
-  );
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 }
-
 /* ================= INIT ================= */
 loadBarrios();
 renderTabs();
