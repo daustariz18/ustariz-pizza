@@ -14,7 +14,7 @@
     <img src="img/logo_IA_Ustariz_Pizza.png" alt="Ustariz Pizza" class="logo">
     <div class="brand-text">
       <span class="brand-name">Ustariz Pizza</span>
-      <span class="brand-tagline">Pizza artesanal al horno</span>
+      <span class="brand-tagline">La pizza que te mereces</span>
     </div>
   </header>
 
@@ -30,8 +30,9 @@
   </section>
 
   <section class="flavor-selection-container">
-    <div class="step-title">
-      <h2>Elige hasta 2 sabores</h2>
+    <div class="step-header">
+      <span class="step-badge">2</span>
+      <h2 class="step-text">Elige hasta 2 sabores</h2>
     </div>
 
     <main class="menu-grid" id="menu-content"></main>
@@ -56,6 +57,20 @@
       <select id="barrio" class="input-field" onchange="updateSummary()">
         <option value="">📍 Selecciona tu barrio</option>
       </select>
+      <div id="payment-info" class="payment-note" style="display: none;"></div>
+      <div id="payment-section" style="display: none; margin-top: 20px;">
+        <div class="step-header" style="padding: 10px 0;">
+          <span class="step-badge">4</span>
+          <h2 class="step-text">Método de pago</h2>
+        </div>
+        
+        <select id="metodo-pago" class="input-field" onchange="updateSummary()">
+          <option value="">💳 Selecciona cómo pagarás</option>
+          <option value="Efectivo" id="opt-efectivo">💵 Efectivo</option>
+          <option value="Nequi">🟣 Nequi (3007014434)</option>
+          <option value="Daviplata">🔴 Daviplata (3128896624)</option>
+        </select>
+      </div>
     </div>
   </section>
 

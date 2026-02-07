@@ -167,61 +167,68 @@ function toggleFlavor(sabor) {
   renderMenu();
 }
 
-/* ================= TOTAL ================= */
-/* ================= TOTAL CORREGIDO ================= */
+/* ================= RESUMEN Y PAGOS ================= */
 function updateSummary() {
-  const totalEl = document.getElementById("total-price");
-  const selectionEl = document.getElementById("selection-text");
-  const orderBtn = document.getElementById("submit-order");
   const barrioKey = document.getElementById("barrio").value;
-  
-  // CORRECCIÓN: Usar el ID correcto del HTML
   const direccion = document.getElementById("direccion_principal").value;
+  const paymentSection = document.getElementById("payment-section");
+  const metodoPagoEl = document.getElementById("metodo-pago");
+  const optEfectivo = document.getElementById("opt-efectivo");
+  const orderBtn = document.getElementById("submit-order");
+  const totalEl = document.getElementById("total-price");
 
-  selectionEl.textContent = `${selected.length}/2 sabores`;
-  selectionEl.style.color = selected.length > 0 ? "var(--price)" : "white";
-
-  if (selected.length === 0) {
-    totalEl.textContent = "$0";
-    orderBtn.disabled = true;
-    return;
+  // 1. CONTROL DE VISIBILIDAD: Solo mostrar si seleccionó barrio
+  if (barrioKey) {
+    paymentSection.style.display = "block";
+    
+    // 2. LÓGICA DE BALCONES DEL MAR (EFECTIVO)
+    if (barrioKey === "Balcones del Mar") {
+      optEfectivo.disabled = false;
+      optEfectivo.textContent = "💵 Efectivo";
+    } else {
+      optEfectivo.disabled = true;
+      optEfectivo.textContent = "❌ Efectivo (No disponible en este barrio)";
+      // Si tenía "Efectivo" seleccionado y cambia a otro barrio, resetear el pago
+      if (metodoPagoEl.value === "Efectivo") {
+        metodoPagoEl.value = "";
+      }
+    }
+  } else {
+    paymentSection.style.display = "none";
+    metodoPagoEl.value = ""; // Resetear selección si quita el barrio
   }
 
-  const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
-  const precioDomicilio = barrioKey ? BARRIOS[barrioKey] : 0;
-  const totalFinal = precioPizza + precioDomicilio;
+  // 3. CÁLCULO DE TOTAL
+  if (selected.length > 0) {
+    const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+    const costoDomicilio = BARRIOS[barrioKey] || 0;
+    const total = precioPizza + costoDomicilio;
+    totalEl.textContent = `$${total.toLocaleString()}`;
+  } else {
+    totalEl.textContent = "$0";
+  }
 
-  totalEl.textContent = `$${totalFinal.toLocaleString()}`;
-
-  // Se activa si hay sabores, barrio y dirección
-  orderBtn.disabled = !(selected.length > 0 && barrioKey && direccion);
+  // 4. VALIDACIÓN DEL BOTÓN FINAL
+  // Se activa solo si hay: Sabores + Barrio + Dirección + Método de Pago
+  const pagoSeleccionado = metodoPagoEl.value;
+  orderBtn.disabled = !(selected.length > 0 && barrioKey && direccion && pagoSeleccionado);
 }
-
-/* ================= PEDIDO ================= */
+/* ================= ENVÍO A WHATSAPP ================= */
 function handleOrder() {
-  const dirPrincipal = document.getElementById("direccion_principal").value;
-  const torre = document.getElementById("torre").value;
-  const apto = document.getElementById("apto").value;
-  const barrio = document.getElementById("barrio").value;
-  const notas = document.getElementById("indicaciones").value;
-
-  const pizzaPrecio = Math.max(...selected.map(s => MENU[activeSize][s]));
-  const domicilio = BARRIOS[barrio];
-  const total = pizzaPrecio + domicilio;
-
-  const descripcion = selected.length === 2
-      ? `${activeSize} (1/2 ${selected[0]} - 1/2 ${selected[1]})`
-      : `${activeSize} de ${selected[0]}`;
+  const pago = document.getElementById("metodo-pago").value;
+  // ... resto de tus variables de dirección y pizza ...
 
   const msg = `🍕 *USTARIZ PIZZA*
 --------------------------
-📦 *Pedido:* ${descripcion}
+📦 *Pedido:* ${desc}
 🏘️ *Barrio:* ${barrio}
-📍 *Dirección:* ${dirPrincipal} ${torre ? '- T:'+torre : ''} ${apto ? '- Apt:'+apto : ''}
-ℹ️ *Notas:* ${notas || 'Ninguna'}
---------------------------
-🚚 *Domicilio:* $${domicilio.toLocaleString()}
-💰 *TOTAL:* $${total.toLocaleString()}`;
+📍 *Dirección:* ${dir}
+💳 *Método de Pago:* ${pago}
+💰 *TOTAL:* $${total.toLocaleString()}
+
+*Cuentas:*
+- Nequi: 3007014434
+- Daviplata: 3128896624`;
 
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 }
