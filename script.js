@@ -177,6 +177,9 @@ function updateSummary() {
   const orderBtn = document.getElementById("submit-order");
   const totalEl = document.getElementById("total-price");
 
+  // AÑADE ESTA LÍNEA AQUÍ:
+  document.getElementById("selection-text").textContent = `${selected.length}/2 sabores`;
+
   // 1. CONTROL DE VISIBILIDAD: Solo mostrar si seleccionó barrio
   if (barrioKey) {
     paymentSection.style.display = "block";
@@ -215,23 +218,44 @@ function updateSummary() {
 }
 /* ================= ENVÍO A WHATSAPP ================= */
 function handleOrder() {
+  const telefono = document.getElementById("telefono").value;
+  const barrio = document.getElementById("barrio").value;
+  const direccion = document.getElementById("direccion_principal").value;
+  const torre = document.getElementById("torre").value;
+  const apto = document.getElementById("apto").value;
+  const indicaciones = document.getElementById("indicaciones").value;
   const pago = document.getElementById("metodo-pago").value;
-  // ... resto de tus variables de dirección y pizza ...
 
-  const msg = `🍕 *USTARIZ PIZZA*
+  const sabores = selected.join(" y ");
+  const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
+  const domicilio = BARRIOS[barrio] || 0;
+  const total = precioPizza + domicilio;
+
+  const direccionCompleta = `
+${direccion}
+${torre ? "Torre " + torre : ""} ${apto ? "Apto " + apto : ""}
+${indicaciones ? "Notas: " + indicaciones : ""}
+`;
+
+  const msg = `
+🍕 *USTARIZ PIZZA*
 --------------------------
-📦 *Pedido:* ${desc}
+📏 *Tamaño:* ${activeSize}
+🍕 *Sabores:* ${sabores}
 🏘️ *Barrio:* ${barrio}
-📍 *Dirección:* ${dir}
-💳 *Método de Pago:* ${pago}
+📍 *Dirección:* ${direccionCompleta}
+💳 *Pago:* ${pago}
 💰 *TOTAL:* $${total.toLocaleString()}
 
-*Cuentas:*
-- Nequi: 3007014434
-- Daviplata: 3128896624`;
+📞 *Tel:* ${telefono}
+  `.trim();
 
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+  window.open(
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+    "_blank"
+  );
 }
+
 /* ================= INIT ================= */
 loadBarrios();
 renderTabs();
