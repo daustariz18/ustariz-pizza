@@ -107,10 +107,10 @@ function renderTabs() {
     btn.className = `tab-btn ${size === activeSize ? "active" : ""}`;
     
     // Usamos la estructura informativa de Salvatore
-    const infoExtra = size === "Small" ? "(8 Porciones)" : 
-                      size === "Medium" ? "(8 Porciones.)" : 
-                      size === "Large" ? "(8 Porciones.)" :
-                      size === "X-Large" ? "(10 Porciones.)" : "(10 Porc.)";
+    const infoExtra = size === "Small" ? "(8 Porciones) - 26cm" : 
+                      size === "Medium" ? "(8 Porciones) - 30cm" : 
+                      size === "Large" ? "(8 Porciones) - 35cm" :
+                      size === "X-Large" ? "(10 Porciones) - 40cm" : "(10 Porciones) - 45cm";
 
     btn.innerHTML = `
       <span class="size-name">${size}</span>
