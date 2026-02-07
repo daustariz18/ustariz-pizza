@@ -216,34 +216,37 @@ function updateSummary() {
   const pagoSeleccionado = metodoPagoEl.value;
   orderBtn.disabled = !(selected.length > 0 && barrioKey && direccion && pagoSeleccionado);
 }
+
 /* ================= ENVÍO A WHATSAPP ================= */
 function handleOrder() {
   const telefono = document.getElementById("telefono").value;
   const barrio = document.getElementById("barrio").value;
   const direccion = document.getElementById("direccion_principal").value;
-  const torre = document.getElementById("torre").value;
-  const apto = document.getElementById("apto").value;
   const indicaciones = document.getElementById("indicaciones").value;
   const pago = document.getElementById("metodo-pago").value;
 
-  const sabores = selected.join(" y ");
+  // Lógica para formatear la descripción del pedido
+  let saboresTexto = "";
+  if (selected.length === 2) {
+    saboresTexto = `1/2 ${selected[0]} y 1/2 ${selected[1]}`;
+  } else {
+    saboresTexto = selected[0];
+  }
+
+  // Combinación solicitada: Tamaño + Sabores
+  const pedidoDetalle = `${activeSize} ${saboresTexto}`;
+
   const precioPizza = Math.max(...selected.map(s => MENU[activeSize][s]));
   const domicilio = BARRIOS[barrio] || 0;
   const total = precioPizza + domicilio;
 
-  const direccionCompleta = `
-${direccion}
-${torre ? "Torre " + torre : ""} ${apto ? "Apto " + apto : ""}
-${indicaciones ? "Notas: " + indicaciones : ""}
-`;
-
   const msg = `
-🍕 *USTARIZ PIZZA*
+🍕 *NUEVO PEDIDO - USTARIZ PIZZA*
 --------------------------
-📏 *Tamaño:* ${activeSize}
-🍕 *Sabores:* ${sabores}
+📦 *Pedido:* ${pedidoDetalle}
 🏘️ *Barrio:* ${barrio}
-📍 *Dirección:* ${direccionCompleta}
+📍 *Dirección:* ${direccion}
+${indicaciones ? "ℹ️ *Notas:* " + indicaciones : ""}
 💳 *Pago:* ${pago}
 💰 *TOTAL:* $${total.toLocaleString()}
 
