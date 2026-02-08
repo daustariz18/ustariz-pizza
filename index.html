@@ -25,7 +25,6 @@
     </div>
     
     <div class="tabs-grid" id="tabs-bar"></div>
-
     <div id="size-recommendation-label" class="size-reco-label"></div>
   </section>
 
@@ -36,6 +35,21 @@
     </div>
 
     <main class="menu-grid" id="menu-content"></main>
+
+    <div style="padding: 0 16px 20px;">
+      <button onclick="addToCart()" class="add-to-cart-btn">
+        ➕ AÑADIR ESTA PIZZA AL PEDIDO
+      </button>
+    </div>
+  </section>
+
+  <section id="cart-summary-section" class="order-form" style="display: none; border-bottom: 1px dashed var(--price); margin-bottom: 10px;">
+    <div class="step-header">
+      <span class="step-badge">🛒</span>
+      <h2 class="step-text">Tus Pizzas Agregadas</h2>
+    </div>
+    <div id="cart-list" class="cart-items-list">
+      </div>
   </section>
 
   <section class="order-form">
@@ -46,13 +60,13 @@
 
     <div class="form-group">
       <input type="tel" id="telefono" placeholder="📞 Teléfono de Contacto" class="input-field">
-      <input type="text" id="direccion_principal" placeholder="🏠 Dirección (Ej:Calle 99A # 42F -211 Conjunto Balcones Del Mar Torre 3 Apto 503)" class="input-field">
-
+      <input type="text" id="direccion_principal" placeholder="🏠 Dirección (Ej: Calle 99A # 42F -211 Conjunto Balcones Del Mar Torre 3 Apto 503)" class="input-field">
       <input type="text" id="indicaciones" placeholder="ℹ️ Notas (Ej: Dejar en portería)" class="input-field">
+      
       <select id="barrio" class="input-field" onchange="updateSummary()">
         <option value="">📍 Selecciona tu barrio</option>
       </select>
-      <div id="payment-info" class="payment-note" style="display: none;"></div>
+
       <div id="payment-section" style="display: none; margin-top: 20px;">
         <div class="step-header" style="padding: 10px 0;">
           <span class="step-badge">4</span>
@@ -65,13 +79,15 @@
           <option value="Nequi">🟣 Nequi (3007014434)</option>
           <option value="Daviplata">🔴 Daviplata (3128896624)</option>
         </select>
+        
+        <div id="payment-info" class="payment-note" style="display: none;"></div>
       </div>
     </div>
   </section>
 
   <footer class="cart-panel">
     <div class="summary">
-      <span id="selection-text">0/2 sabores</span>
+      <span id="selection-text">Pedido vacío</span> 
       <span id="total-price">$0</span>
     </div>
 
@@ -86,6 +102,5 @@
   </footer>
 
   <script src="script.js"></script>
-
 </body>
 </html>
