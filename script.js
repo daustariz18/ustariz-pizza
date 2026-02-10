@@ -10,7 +10,8 @@ const RECO_MESSAGES = {
   "Small": "Ideal para 1 - 2 personas",
   "Medium": "Ideal para 2 - 3 personas",
   "Large": "Ideal para 3 - 4 personas",
-  "X-Large": "Ideal para 4 - 5 personas"
+  "X-Large": "Ideal para 4 - 5 personas",
+  "Familiar": "Ideal para 5 - 6 personas"
 };
 
 const IMAGES = {
@@ -67,7 +68,7 @@ function renderTabs() {
     else if (size === "Medium") infoExtra = "(8 Porciones) - 30cm";
     else if (size === "Large") infoExtra = "(8 Porciones) - 35cm";
     else if (size === "X-Large") infoExtra = "(10 Porciones) - 40cm";
-
+    else if (size === "Familiar") infoExtra = "(12 Porciones) - 50cm";
     btn.innerHTML = `<span class="size-name">${size}</span><span class="size-info">${infoExtra}</span>`;
     btn.onclick = () => {
       activeSize = size;
