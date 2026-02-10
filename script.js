@@ -23,7 +23,8 @@ const MENU = {
   "Small": { "Salami": 30000, "Jamon": 30000, "Pollo": 30000, "Pepperoni": 32000, "Salami Pimenton": 30000, "Hawaiana": 32000, "Pollo Jamon": 32000, "3 Carnes": 34000 },
   "Medium": { "Salami": 40000, "Jamon": 40000, "Pollo": 40000, "Pepperoni": 42000, "Salami Pimenton": 40000, "Hawaiana": 42000, "Pollo Jamon": 42000, "3 Carnes": 44000 },
   "Large": { "Salami": 50000, "Jamon": 50000, "Pollo": 50000, "Pepperoni": 52000, "Salami Pimenton": 50000, "Hawaiana": 52000, "Pollo Jamon": 52000, "3 Carnes": 54000 },
-  "X-Large": { "Salami": 60000, "Jamon": 60000, "Pollo": 60000, "Pepperoni": 62000, "Salami Pimenton": 60000, "Hawaiana": 62000, "Pollo Jamon": 62000, "3 Carnes": 64000 }
+  "X-Large": { "Salami": 60000, "Jamon": 60000, "Pollo": 60000, "Pepperoni": 62000, "Salami Pimenton": 60000, "Hawaiana": 62000, "Pollo Jamon": 62000, "3 Carnes": 64000 },
+  "Familiar": { "Salami": 70000, "Jamon": 70000, "Pollo": 70000, "Pepperoni": 72000, "Salami Pimenton": 70000, "Hawaiana": 72000, "Pollo Jamon": 72000, "3 Carnes": 74000 }
 };
 
 const BARRIOS = {
