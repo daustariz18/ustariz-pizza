@@ -10,6 +10,9 @@
 </head>
 <body>
 
+  <!-- Notificaciones Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
   <header class="top-bar">
     <img src="img/logo_IA_Ustariz_Pizza.png" alt="Ustariz Pizza" class="logo">
     <div class="brand-text">
@@ -37,7 +40,7 @@
     <main class="menu-grid" id="menu-content"></main>
 
     <div style="padding: 0 16px 20px;">
-      <button onclick="addToCart()" class="add-to-cart-btn">
+      <button id="add-to-cart-btn" class="add-to-cart-btn" disabled>
         ➕ AÑADIR ESTA PIZZA AL PEDIDO
       </button>
     </div>
@@ -59,8 +62,10 @@
     </div>
 
     <div class="form-group">
-      <input type="tel" id="telefono" placeholder="📞 Teléfono de Contacto" class="input-field">
+      <input type="tel" id="telefono" placeholder="📞 Teléfono de Contacto (10 dígitos)" class="input-field" maxlength="10">
+      <span class="error-message" id="telefono-error"></span>
       <input type="text" id="direccion_principal" placeholder="🏠 Dirección (Ej: Calle 99A # 42F -211 Conjunto Balcones Del Mar Torre 3 Apto 503)" class="input-field">
+      <span class="error-message" id="direccion-error"></span>
       <input type="text" id="indicaciones" placeholder="ℹ️ Notas (Ej: Dejar en portería)" class="input-field">
       
       <select id="barrio" class="input-field" onchange="updateSummary()">
@@ -95,7 +100,6 @@
       class="order-btn"
       id="submit-order"
       disabled
-      onclick="handleOrder()"
     >
       CONFIRMAR PEDIDO POR WHATSAPP
     </button>
