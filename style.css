@@ -233,6 +233,57 @@ body {
   box-shadow: none;
 }
 
+/* ================= MODAL HORARIO ================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 4000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+  background: var(--card);
+  border: 1px solid var(--gray-border);
+  border-radius: 16px;
+  padding: 20px 18px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.modal-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.modal-card p {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.modal-close-btn {
+  border: none;
+  background: var(--price);
+  color: #000;
+  font-weight: 900;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.98);
+}
+
 /* ================= CARRITO / RESUMEN ================= */
 .cart-items-list {
   margin: 0 16px;
@@ -356,4 +407,11 @@ body {
 @media (min-width: 768px) {
   .tabs-grid { grid-template-columns: repeat(4, 1fr); }
   .menu-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
+.order-btn:disabled { 
+  background: #444 !important; /* Gris oscuro */
+  opacity: 0.8; 
+  cursor: not-allowed;
+  pointer-events: none; /* Evita cualquier interacción */
 }

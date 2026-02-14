@@ -1,3 +1,42 @@
+/* ================= CONTROL OPERATIVO REMOTO ================= */
+const CONFIG_SISTEMA = {
+  HORA_APERTURA: 17,
+  HORA_CIERRE: 22,
+  // Este objeto simula lo que vendrá de tu base de datos (Firebase)
+  estadoRemoto: {
+    appEncendida: true,
+    saboresAgotados: [] // Ejemplo: ["Pepperoni", "Pollo"]
+  }
+};
+
+// Función para verificar horario comercial
+function verificarHorario() {
+  const hora = new Date().getHours();
+  return hora >= CONFIG_SISTEMA.HORA_APERTURA && hora < CONFIG_SISTEMA.HORA_CIERRE;
+}
+
+// Modificación en renderMenu para ocultar sabores agotados
+function renderMenu() {
+  const grid = document.getElementById("menu-content");
+  grid.innerHTML = "";
+
+  Object.entries(MENU[activeSize]).forEach(([sabor, precio]) => {
+    // Si el sabor está en la lista de agotados, no lo mostramos o lo deshabilitamos
+    const estaAgotado = CONFIG_SISTEMA.estadoRemoto.saboresAgotados.includes(sabor);
+    
+    if (estaAgotado) return; // Simplemente no aparece en el menú
+
+    const card = document.createElement("div");
+    card.className = `pizza-card ${selectedFlavors.includes(sabor) ? "selected" : ""}`;
+    card.innerHTML = `
+      <div class="pizza-image">
+        <img src="${IMAGES[sabor]}" alt="${sabor}">
+        <div class="overlay"><h3>${sabor}</h3><span>$${precio.toLocaleString()}</span></div>
+      </div>`;
+    card.onclick = () => toggleFlavor(sabor);
+    grid.appendChild(card);
+  });
+}
 const WHATSAPP_NUMBER = "573001720582";
 
 const CUENTAS_PAGO = {
@@ -104,6 +143,32 @@ function validateForm() {
   }
   
   return isValid;
+}
+
+function formatHour24To12(hour24) {
+  const normalized = ((hour24 % 24) + 24) % 24;
+  const period = normalized >= 12 ? "PM" : "AM";
+  const hour12 = ((normalized + 11) % 12) + 1;
+  return `${hour12}:00 ${period}`;
+}
+
+function showHorarioModal(message) {
+  const modal = document.getElementById("horario-modal");
+  const messageEl = document.getElementById("horario-modal-message");
+
+  if (!modal || !messageEl) return;
+  if (modal.style.display === "flex") return;
+
+  messageEl.textContent = message;
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function hideHorarioModal() {
+  const modal = document.getElementById("horario-modal");
+  if (!modal) return;
+  modal.style.display = "none";
+  document.body.style.overflow = "";
 }
 
 /* ================= COMPONENTES DE UI ================= */
@@ -304,7 +369,7 @@ function updateOrderButton() {
   );
 }
 
-function updateUI() {
+async function updateUI() {
   updateCartList();
   updateSelectionText();
   updatePaymentSection();
@@ -312,6 +377,69 @@ function updateUI() {
   updateOrderButton();
   renderTabs();
   renderMenu();
+
+  // NUEVA LÓGICA DE CIERRE
+  const orderBtn = document.getElementById("submit-order");
+  const addBtn = document.getElementById("add-to-cart-btn");
+  const defaultOrderText = orderBtn.dataset.defaultText || orderBtn.textContent;
+  const defaultAddText = addBtn.dataset.defaultText || addBtn.textContent;
+
+  orderBtn.dataset.defaultText = defaultOrderText;
+  addBtn.dataset.defaultText = defaultAddText;
+
+  let disponibilidad = { estado: true, mensaje: "" };
+
+  if (typeof estaTiendaHabilitada === "function") {
+    try {
+      disponibilidad = await estaTiendaHabilitada();
+    } catch (error) {
+      console.error("Error al verificar disponibilidad:", error);
+    }
+  } else {
+    const dentroHorario = verificarHorario();
+    const appEncendida = CONFIG_SISTEMA.estadoRemoto.appEncendida;
+
+    if (!dentroHorario || !appEncendida) {
+      disponibilidad = {
+        estado: false,
+        mensaje: appEncendida ? "FUERA DE HORARIO" : "SISTEMA CERRADO"
+      };
+    }
+  }
+
+  const statusMsg = document.getElementById("sistema-status-msg");
+  const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
+  const mensajeCliente = disponibilidad.estado
+    ? ""
+    : (disponibilidad.mensaje === "SISTEMA CERRADO"
+      ? "En este momento no estamos recibiendo pedidos. Vuelve pronto."
+      : `En este momento no estamos recibiendo pedidos. ${horarioTexto}`);
+
+  if (!disponibilidad.estado) {
+    // Bloqueamos el botón de WhatsApp
+    orderBtn.disabled = true;
+    orderBtn.textContent = disponibilidad.mensaje;
+    orderBtn.style.background = "#444"; // Color gris de "apagado"
+    
+    // Bloqueamos la opción de añadir más pizzas
+    addBtn.disabled = true;
+    addBtn.textContent = "SISTEMA CERRADO";
+
+    if (statusMsg) {
+      statusMsg.style.display = "block";
+      statusMsg.innerHTML = `⚠️ <strong>¡Lo sentimos!</strong> ${mensajeCliente}`;
+    }
+
+    showHorarioModal(mensajeCliente);
+  } else {
+    orderBtn.textContent = defaultOrderText;
+    orderBtn.style.background = "";
+    addBtn.textContent = defaultAddText;
+    updateOrderButton();
+    updateAddButton();
+    if (statusMsg) statusMsg.style.display = "none";
+    hideHorarioModal();
+  }
 }
 
 function handleOrder() {
@@ -394,4 +522,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicialización
   loadBarrios();
   updateUI();
+
+  const modal = document.getElementById("horario-modal");
+  const closeModalBtn = document.getElementById("close-horario-modal");
+
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", hideHorarioModal);
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) hideHorarioModal();
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") hideHorarioModal();
+  });
 });
