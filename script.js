@@ -1,42 +1,44 @@
+/* ================= CONEXIÓN CON FIREBASE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPtNqWL8auMiWfu3rNA992MWSFZVhVSbc",
+  authDomain: "ustariz-pizza.firebaseapp.com",
+  databaseURL: "https://ustariz-pizza-default-rtdb.firebaseio.com",
+  projectId: "ustariz-pizza",
+  storageBucket: "ustariz-pizza.firebasestorage.app",
+  messagingSenderId: "1016949121809",
+  appId: "1:1016949121809:web:b197ca9e34d263942f22b0",
+  measurementId: "G-DWL8WKFQJD"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 /* ================= CONTROL OPERATIVO REMOTO ================= */
 const CONFIG_SISTEMA = {
   HORA_APERTURA: 17,
   HORA_CIERRE: 22,
-  // Este objeto simula lo que vendrá de tu base de datos (Firebase)
   estadoRemoto: {
     appEncendida: true,
-    saboresAgotados: [] // Ejemplo: ["Pepperoni", "Pollo"]
+    saboresAgotados: [] 
   }
 };
 
-// Función para verificar horario comercial
-function verificarHorario() {
-  const hora = new Date().getHours();
-  return hora >= CONFIG_SISTEMA.HORA_APERTURA && hora < CONFIG_SISTEMA.HORA_CIERRE;
-}
-
-// Modificación en renderMenu para ocultar sabores agotados
-function renderMenu() {
-  const grid = document.getElementById("menu-content");
-  grid.innerHTML = "";
-
-  Object.entries(MENU[activeSize]).forEach(([sabor, precio]) => {
-    // Si el sabor está en la lista de agotados, no lo mostramos o lo deshabilitamos
-    const estaAgotado = CONFIG_SISTEMA.estadoRemoto.saboresAgotados.includes(sabor);
+// Escuchar cambios desde el Panel de Administrador en tiempo real
+onValue(ref(db, 'configuracion'), (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    CONFIG_SISTEMA.estadoRemoto.appEncendida = data.appEncendida;
+    CONFIG_SISTEMA.estadoRemoto.saboresAgotados = data.saboresAgotados || [];
     
-    if (estaAgotado) return; // Simplemente no aparece en el menú
+    // Cada vez que cambie algo en el admin, refrescamos la interfaz del cliente
+    updateUI();
+  }
+});
 
-    const card = document.createElement("div");
-    card.className = `pizza-card ${selectedFlavors.includes(sabor) ? "selected" : ""}`;
-    card.innerHTML = `
-      <div class="pizza-image">
-        <img src="${IMAGES[sabor]}" alt="${sabor}">
-        <div class="overlay"><h3>${sabor}</h3><span>$${precio.toLocaleString()}</span></div>
-      </div>`;
-    card.onclick = () => toggleFlavor(sabor);
-    grid.appendChild(card);
-  });
-}
+/* ================= DATOS DEL MENÚ ================= */
 const WHATSAPP_NUMBER = "573001720582";
 
 const CUENTAS_PAGO = {
@@ -80,133 +82,16 @@ const BARRIOS = {
   "Alameda del Rio": 8000, "Buenavista": 8000, "Villa Santos": 6000, "Villa Campestre": 10000
 };
 
-/* ================= ESTADO ================= */
+/* ================= ESTADO APP ================= */
 let activeSize = "Small";
 let selectedFlavors = [];
 let cart = [];
 
-/* ================= UTILIDADES ================= */
-function showToast(message, type = "success") {
-  const container = document.getElementById("toast-container");
-  const toast = document.createElement("div");
-  toast.className = `toast ${type}`;
-  
-  const icon = type === "success" ? "✓" : type === "error" ? "✕" : "ℹ";
-  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-  
-  container.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
+/* ================= FUNCIONES CORE ================= */
 
-function validatePhone(phone) {
-  const cleaned = phone.replace(/\D/g, "");
-  return cleaned.length === 10 && /^3\d{9}$/.test(cleaned);
-}
-
-function validateForm() {
-  let isValid = true;
-  
-  const telefono = document.getElementById("telefono");
-  const telefonoError = document.getElementById("telefono-error");
-  const direccion = document.getElementById("direccion_principal");
-  const direccionError = document.getElementById("direccion-error");
-  
-  // Validar teléfono
-  if (!telefono.value.trim()) {
-    telefonoError.textContent = "El teléfono es obligatorio";
-    telefono.classList.add("invalid");
-    isValid = false;
-  } else if (!validatePhone(telefono.value)) {
-    telefonoError.textContent = "Ingresa un número válido de 10 dígitos (debe empezar con 3)";
-    telefono.classList.add("invalid");
-    isValid = false;
-  } else {
-    telefonoError.textContent = "";
-    telefono.classList.remove("invalid");
-  }
-  
-  // Validar dirección
-  if (!direccion.value.trim()) {
-    direccionError.textContent = "La dirección es obligatoria";
-    direccion.classList.add("invalid");
-    isValid = false;
-  } else if (direccion.value.trim().length < 10) {
-    direccionError.textContent = "La dirección debe ser más específica";
-    direccion.classList.add("invalid");
-    isValid = false;
-  } else {
-    direccionError.textContent = "";
-    direccion.classList.remove("invalid");
-  }
-  
-  return isValid;
-}
-
-function formatHour24To12(hour24) {
-  const normalized = ((hour24 % 24) + 24) % 24;
-  const period = normalized >= 12 ? "PM" : "AM";
-  const hour12 = ((normalized + 11) % 12) + 1;
-  return `${hour12}:00 ${period}`;
-}
-
-function showHorarioModal(message) {
-  const modal = document.getElementById("horario-modal");
-  const messageEl = document.getElementById("horario-modal-message");
-
-  if (!modal || !messageEl) return;
-  if (modal.style.display === "flex") return;
-
-  messageEl.textContent = message;
-  modal.style.display = "flex";
-  document.body.style.overflow = "hidden";
-}
-
-function hideHorarioModal() {
-  const modal = document.getElementById("horario-modal");
-  if (!modal) return;
-  modal.style.display = "none";
-  document.body.style.overflow = "";
-}
-
-/* ================= COMPONENTES DE UI ================= */
-function loadBarrios() {
-  const select = document.getElementById("barrio");
-  Object.entries(BARRIOS).forEach(([barrio, valor]) => {
-    const opt = document.createElement("option");
-    opt.value = barrio;
-    opt.textContent = `${barrio} (+$${valor.toLocaleString()})`;
-    select.appendChild(opt);
-  });
-}
-
-function renderTabs() {
-  const tabs = document.getElementById("tabs-bar");
-  const recoLabel = document.getElementById("size-recommendation-label");
-  tabs.innerHTML = "";
-
-  if (activeSize) {
-    recoLabel.innerHTML = `👥 ${RECO_MESSAGES[activeSize]}`;
-    recoLabel.style.display = "block";
-  }
-
-  Object.keys(MENU).forEach(size => {
-    const btn = document.createElement("button");
-    btn.className = `tab-btn ${size === activeSize ? "active" : ""}`;
-    
-    const info = SIZE_INFO[size];
-    const infoExtra = `(${info.portions} Porciones) - ${info.diameter}`;
-    
-    btn.innerHTML = `<span class="size-name">${size}</span><span class="size-info">${infoExtra}</span>`;
-    btn.onclick = () => {
-      activeSize = size;
-      selectedFlavors = [];
-      updateUI();
-    };
-    tabs.appendChild(btn);
-  });
+function verificarHorario() {
+  const hora = new Date().getHours();
+  return hora >= CONFIG_SISTEMA.HORA_APERTURA && hora < CONFIG_SISTEMA.HORA_CIERRE;
 }
 
 function renderMenu() {
@@ -214,6 +99,10 @@ function renderMenu() {
   grid.innerHTML = "";
 
   Object.entries(MENU[activeSize]).forEach(([sabor, precio]) => {
+    // FILTRADO DINÁMICO: Si el admin lo marcó como agotado, desaparece del menú
+    const estaAgotado = CONFIG_SISTEMA.estadoRemoto.saboresAgotados.includes(sabor);
+    if (estaAgotado) return;
+
     const card = document.createElement("div");
     card.className = `pizza-card ${selectedFlavors.includes(sabor) ? "selected" : ""}`;
     card.innerHTML = `
@@ -224,13 +113,63 @@ function renderMenu() {
     card.onclick = () => toggleFlavor(sabor);
     grid.appendChild(card);
   });
-  
   updateAddButton();
 }
 
-function updateAddButton() {
+async function updateUI() {
+  // 1. Verificar Disponibilidad General
+  const dentroHorario = verificarHorario();
+  const appEncendida = CONFIG_SISTEMA.estadoRemoto.appEncendida;
+  
+  const orderBtn = document.getElementById("submit-order");
   const addBtn = document.getElementById("add-to-cart-btn");
-  addBtn.disabled = selectedFlavors.length === 0;
+  const statusMsg = document.getElementById("sistema-status-msg");
+
+  const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
+  
+  if (!dentroHorario || !appEncendida) {
+    const isForceClosed = appEncendida === false;
+    const msg = isForceClosed ? "CERRADO POR FUERZA MAYOR" : "FUERA DE HORARIO";
+    orderBtn.disabled = true;
+    orderBtn.textContent = msg;
+    orderBtn.style.background = "#444";
+    addBtn.disabled = true;
+    addBtn.textContent = "SISTEMA CERRADO";
+
+    if (statusMsg) {
+      statusMsg.style.display = "block";
+      statusMsg.innerHTML = `⚠️ <strong>¡Lo sentimos!</strong> En este momento no estamos recibiendo pedidos. ${isForceClosed ? "Vuelve pronto." : horarioTexto}`;
+    }
+  } else {
+    orderBtn.textContent = "ENVIAR PEDIDO POR WHATSAPP";
+    orderBtn.style.background = "";
+    addBtn.textContent = "Añadir al pedido";
+    updateOrderButton();
+    updateAddButton();
+    if (statusMsg) statusMsg.style.display = "none";
+    hideHorarioModal();
+  }
+
+  // 2. Renderizar componentes normales
+  updateCartList();
+  updateSelectionText();
+  updateSummary();
+  renderTabs();
+  renderMenu();
+}
+
+/* ================= EL RESTO DE TUS FUNCIONES (TOAST, CART, ETC) ================= */
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  let icon = "ℹ";
+  if (type === "success") icon = "✓";
+  if (type === "error") icon = "✕";
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 function toggleFlavor(sabor) {
@@ -247,13 +186,8 @@ function toggleFlavor(sabor) {
   updateSelectionText();
 }
 
-/* ================= LÓGICA DE CARRITO ================= */
 function addToCart() {
-  if (selectedFlavors.length === 0) {
-    showToast("Selecciona al menos 1 sabor", "error");
-    return;
-  }
-
+  if (selectedFlavors.length === 0) return;
   const unitPrice = Math.max(...selectedFlavors.map(s => MENU[activeSize][s]));
   const item = {
     id: Date.now(),
@@ -262,281 +196,168 @@ function addToCart() {
     price: unitPrice,
     text: selectedFlavors.length === 2 ? `1/2 ${selectedFlavors[0]} y 1/2 ${selectedFlavors[1]}` : selectedFlavors[0]
   };
-
   cart.push(item);
-  
-  // Feedback visual
-  showToast(`🍕 Pizza ${item.size} agregada al pedido`, "success");
-  
-  // Reset selección
+  showToast(`🍕 Pizza ${item.size} agregada`, "success");
   selectedFlavors = []; 
   updateUI();
-  
-  // Scroll suave hacia el carrito
-  document.getElementById("cart-summary-section").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function removeFromCart(id) {
-  const item = cart.find(i => i.id === id);
-  if (item && confirm(`¿Eliminar pizza ${item.size} del pedido?`)) {
-    cart = cart.filter(i => i.id !== id);
-    showToast("Pizza eliminada del pedido", "error");
-    updateUI();
-  }
+  cart = cart.filter(i => i.id !== id);
+  updateUI();
 }
 
-/* ================= RESUMEN Y ENVÍO ================= */
 function updateCartList() {
   const cartList = document.getElementById("cart-list");
-  const cartSummarySection = document.getElementById("cart-summary-section");
-  
+  const section = document.getElementById("cart-summary-section");
   if (cart.length > 0) {
-    cartSummarySection.style.display = "block";
+    section.style.display = "block";
     cartList.innerHTML = cart.map(item => `
       <div class="cart-item-row">
-        <div>
-          <strong>${item.size}</strong><br>
-          <small>${item.text}</small>
-        </div>
+        <div><strong>${item.size}</strong><br><small>${item.text}</small></div>
         <div style="text-align: right;">
           <span>$${item.price.toLocaleString()}</span><br>
           <button onclick="removeFromCart(${item.id})" class="btn-remove">✕ Borrar</button>
         </div>
-      </div>
-    `).join("");
+      </div>`).join("");
   } else {
-    cartSummarySection.style.display = "none";
-    cartList.innerHTML = "";
+    section.style.display = "none";
   }
 }
 
-function updateSelectionText() {
-  const selectionText = document.getElementById("selection-text");
-  
-  if (selectedFlavors.length > 0) {
-    selectionText.textContent = `🍕 Seleccionando sabores (${selectedFlavors.length}/2)`;
-  } else {
-    selectionText.textContent = cart.length > 0 ? `✅ ${cart.length} pizza(s) en pedido` : "Pedido vacío";
-  }
+function renderTabs() {
+  const tabs = document.getElementById("tabs-bar");
+  const recoLabel = document.getElementById("size-recommendation-label");
+  tabs.innerHTML = "";
+  recoLabel.innerHTML = `👥 ${RECO_MESSAGES[activeSize]}`;
+  Object.keys(MENU).forEach(size => {
+    const btn = document.createElement("button");
+    btn.className = `tab-btn ${size === activeSize ? "active" : ""}`;
+    const info = SIZE_INFO[size];
+    btn.innerHTML = `<span class="size-name">${size}</span><span class="size-info">${info.portions} Porc. - ${info.diameter}</span>`;
+    btn.onclick = () => { activeSize = size; selectedFlavors = []; updateUI(); };
+    tabs.appendChild(btn);
+  });
 }
 
-function updatePaymentSection() {
-  const barrioKey = document.getElementById("barrio").value;
-  const metodoPagoEl = document.getElementById("metodo-pago");
-  const optEfectivo = document.getElementById("opt-efectivo");
-  
-  if (barrioKey) {
-    document.getElementById("payment-section").style.display = "block";
-    
-    if (barrioKey === "Balcones del Mar") {
-      optEfectivo.style.display = "block";
-      optEfectivo.disabled = false;
-    } else {
-      optEfectivo.style.display = "none";
-      optEfectivo.disabled = true;
-      if (metodoPagoEl.value === "Efectivo") metodoPagoEl.value = "";
-    }
-  } else {
-    document.getElementById("payment-section").style.display = "none";
-  }
+function validatePhone(phone) {
+  const cleaned = phone.replaceAll(/\D/g, "");
+  return cleaned.length === 10 && /^3\d{9}$/.test(cleaned);
 }
 
-function updateTotal() {
-  const barrioKey = document.getElementById("barrio").value;
-  const totalEl = document.getElementById("total-price");
-  
-  const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
-  const domicilio = BARRIOS[barrioKey] || 0;
-  totalEl.textContent = `$${(subtotal + domicilio).toLocaleString()}`;
+function validateForm() {
+  const telefono = document.getElementById("telefono");
+  const direccion = document.getElementById("direccion_principal");
+  let valid = true;
+  const telefonoValido = validatePhone(telefono.value);
+  if (telefonoValido === false) {
+    telefono.classList.add("invalid");
+    valid = false;
+  } else {
+    telefono.classList.remove("invalid");
+  }
+  if (direccion.value.trim().length < 10) {
+    direccion.classList.add("invalid");
+    valid = false;
+  } else {
+    direccion.classList.remove("invalid");
+  }
+  return valid;
 }
 
 function updateOrderButton() {
-  const barrioKey = document.getElementById("barrio").value;
-  const direccion = document.getElementById("direccion_principal").value.trim();
-  const telefono = document.getElementById("telefono").value.trim();
-  const metodoPagoEl = document.getElementById("metodo-pago").value;
   const orderBtn = document.getElementById("submit-order");
-  
-  const hasValidPhone = validatePhone(telefono);
-  const hasValidAddress = direccion.length >= 10;
-  
-  orderBtn.disabled = !(
-    cart.length > 0 && 
-    barrioKey && 
-    hasValidPhone && 
-    hasValidAddress && 
-    metodoPagoEl
-  );
-}
+  const barrio = document.getElementById("barrio").value;
+  const tel = document.getElementById("telefono").value;
+  const dir = document.getElementById("direccion_principal").value;
+  const pago = document.getElementById("metodo-pago").value;
 
-async function updateUI() {
-  updateCartList();
-  updateSelectionText();
-  updatePaymentSection();
-  updateTotal();
-  updateOrderButton();
-  renderTabs();
-  renderMenu();
-
-  // NUEVA LÓGICA DE CIERRE
-  const orderBtn = document.getElementById("submit-order");
-  const addBtn = document.getElementById("add-to-cart-btn");
-  const defaultOrderText = orderBtn.dataset.defaultText || orderBtn.textContent;
-  const defaultAddText = addBtn.dataset.defaultText || addBtn.textContent;
-
-  orderBtn.dataset.defaultText = defaultOrderText;
-  addBtn.dataset.defaultText = defaultAddText;
-
-  let disponibilidad = { estado: true, mensaje: "" };
-
-  if (typeof estaTiendaHabilitada === "function") {
-    try {
-      disponibilidad = await estaTiendaHabilitada();
-    } catch (error) {
-      console.error("Error al verificar disponibilidad:", error);
-    }
-  } else {
-    const dentroHorario = verificarHorario();
-    const appEncendida = CONFIG_SISTEMA.estadoRemoto.appEncendida;
-
-    if (!dentroHorario || !appEncendida) {
-      disponibilidad = {
-        estado: false,
-        mensaje: appEncendida ? "FUERA DE HORARIO" : "SISTEMA CERRADO"
-      };
-    }
-  }
-
-  const statusMsg = document.getElementById("sistema-status-msg");
-  const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
-  const mensajeCliente = disponibilidad.estado
-    ? ""
-    : (disponibilidad.mensaje === "SISTEMA CERRADO"
-      ? "En este momento no estamos recibiendo pedidos. Vuelve pronto."
-      : `En este momento no estamos recibiendo pedidos. ${horarioTexto}`);
-
-  if (!disponibilidad.estado) {
-    // Bloqueamos el botón de WhatsApp
-    orderBtn.disabled = true;
-    orderBtn.textContent = disponibilidad.mensaje;
-    orderBtn.style.background = "#444"; // Color gris de "apagado"
-    
-    // Bloqueamos la opción de añadir más pizzas
-    addBtn.disabled = true;
-    addBtn.textContent = "SISTEMA CERRADO";
-
-    if (statusMsg) {
-      statusMsg.style.display = "block";
-      statusMsg.innerHTML = `⚠️ <strong>¡Lo sentimos!</strong> ${mensajeCliente}`;
-    }
-
-    showHorarioModal(mensajeCliente);
-  } else {
-    orderBtn.textContent = defaultOrderText;
-    orderBtn.style.background = "";
-    addBtn.textContent = defaultAddText;
-    updateOrderButton();
-    updateAddButton();
-    if (statusMsg) statusMsg.style.display = "none";
-    hideHorarioModal();
-  }
+  const abierta = verificarHorario() && CONFIG_SISTEMA.estadoRemoto.appEncendida;
+  orderBtn.disabled = !(cart.length > 0 && barrio && validatePhone(tel) && dir.length >= 10 && pago && abierta);
 }
 
 function handleOrder() {
-  if (!validateForm()) {
-    showToast("Por favor corrige los errores del formulario", "error");
+  if (!validateForm()) return;
+  const pagoKey = document.getElementById("metodo-pago").value;
+  if ((pagoKey === "Nequi" || pagoKey === "Daviplata") && !confirm("⚠️ ¿Confirmas que enviarás el comprobante por WhatsApp?")) return;
+
+  const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+  const domicilio = BARRIOS[document.getElementById("barrio").value] || 0;
+  const lista = cart.map(i => `• ${i.size}: ${i.text}`).join("\n");
+  
+  const msg = `🍕 *NUEVO PEDIDO - USTARIZ PIZZA*\n\n${lista}\n\n📍 *Dir:* ${document.getElementById("direccion_principal").value}\n🏘️ *Barrio:* ${document.getElementById("barrio").value}\n💳 *Pago:* ${pagoKey}\n⭐ *TOTAL:* $${(subtotal + domicilio).toLocaleString()}`;
+  
+  globalThis.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+/* ================= FUNCIONES DE APOYO UI ================= */
+function formatHour24To12(h) {
+  if (h === 0) return "12:00 AM";
+  if (h === 12) return "12:00 PM";
+  return h > 12 ? `${h - 12}:00 PM` : `${h}:00 AM`;
+}
+function hideHorarioModal() { document.getElementById("horario-modal").style.display = "none"; document.body.style.overflow = ""; }
+function updateSelectionText() {
+  const selection = document.getElementById("selection-text");
+  if (selectedFlavors.length > 0) {
+    selection.textContent = `🍕 Sabores (${selectedFlavors.length}/2)`;
+    return;
+  }
+  if (cart.length > 0) {
+    selection.textContent = `✅ ${cart.length} pizza(s)`;
+    return;
+  }
+  selection.textContent = "Pedido vacío";
+}
+function updatePaymentSection() { document.getElementById("payment-section").style.display = document.getElementById("barrio").value ? "block" : "none"; }
+function updatePaymentInfo() {
+  const paymentInfo = document.getElementById("payment-info");
+  const metodo = document.getElementById("metodo-pago").value;
+
+  if (!metodo || metodo === "Efectivo") {
+    paymentInfo.style.display = "none";
+    paymentInfo.textContent = "";
     return;
   }
 
-  const telefono = document.getElementById("telefono").value;
-  const barrio = document.getElementById("barrio").value;
-  const direccion = document.getElementById("direccion_principal").value;
-  const indicaciones = document.getElementById("indicaciones").value;
-  const pagoKey = document.getElementById("metodo-pago").value;
-
-  // NUEVA ALERTA DE COMPROBANTE
-  if (pagoKey === "Nequi" || pagoKey === "Daviplata") {
-    const confirmar = confirm("⚠️ RECUERDA: Para iniciar la preparación de tu pizza, debes adjuntar el COMPROBANTE DE PAGO (pantallazo) una vez se abra el chat de WhatsApp. ¿Deseas continuar?");
-    if (!confirmar) return;
-  }
-
-  const listaPedido = cart.map(item => `• ${item.size}: ${item.text} ($${item.price.toLocaleString()})`).join("\n");
-  const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
-  const domicilio = BARRIOS[barrio] || 0;
-  
-  const infoPago = CUENTAS_PAGO[pagoKey];
-  const pagoDetalle = (pagoKey === "Nequi" || pagoKey === "Daviplata") 
-    ? `${pagoKey} (Confirmar a: ${infoPago})` 
-    : pagoKey;
-
-  const msg = `
-🍕 *NUEVO PEDIDO - USTARIZ PIZZA*
-----------------------------------
-📦 *Detalle:*
-${listaPedido}
-
-🏘️ *Barrio:* ${barrio}
-📍 *Dirección:* ${direccion}
-${indicaciones ? "ℹ️ *Notas:* " + indicaciones : ""}
-💳 *Pago:* ${pagoDetalle}
-
-💰 *Subtotal:* $${subtotal.toLocaleString()}
-🛵 *Domicilio:* $${domicilio.toLocaleString()}
-⭐ *TOTAL:* $${(subtotal + domicilio).toLocaleString()}
-
-📞 *Contacto:* ${telefono}
-
----
-⚠️ *Adjunto el comprobante de pago a continuación:*`.trim();
-
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
-  showToast("Abriendo WhatsApp...", "success");
+  const cuenta = CUENTAS_PAGO[metodo];
+  paymentInfo.style.display = "block";
+  paymentInfo.textContent = `Número ${metodo}: ${cuenta}. Envía el comprobante por WhatsApp.`;
+}
+function updateTotal() {
+  const domi = BARRIOS[document.getElementById("barrio").value] || 0;
+  const sub = cart.reduce((a, b) => a + b.price, 0);
+  document.getElementById("total-price").textContent = `$${(sub + domi).toLocaleString()}`;
+}
+function updateSummary() {
+  updatePaymentSection();
+  updatePaymentInfo();
+  updateTotal();
+  updateOrderButton();
+}
+function updateAddButton() { document.getElementById("add-to-cart-btn").disabled = selectedFlavors.length === 0; }
+function loadBarrios() {
+  const sel = document.getElementById("barrio");
+  Object.entries(BARRIOS).forEach(([b, v]) => {
+    const opt = document.createElement("option");
+    opt.value = b; opt.textContent = `${b} (+$${v.toLocaleString()})`; sel.appendChild(opt);
+  });
 }
 
-/* ================= EVENT LISTENERS ================= */
+// Global para los botones del HTML
+globalThis.removeFromCart = removeFromCart;
+globalThis.updateSummary = updateSummary;
+
+/* ================= INICIALIZACIÓN ================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // Botón añadir al carrito
   document.getElementById("add-to-cart-btn").addEventListener("click", addToCart);
-  
-  // Botón enviar pedido
   document.getElementById("submit-order").addEventListener("click", handleOrder);
+  document.getElementById("telefono").addEventListener("input", (e) => { e.target.value = e.target.value.replaceAll(/\D/g, ""); updateSummary(); });
+  document.getElementById("barrio").addEventListener("change", updateSummary);
+  document.getElementById("metodo-pago").addEventListener("change", updateSummary);
+  document.getElementById("direccion_principal").addEventListener("input", updateSummary);
+  document.getElementById("close-horario-modal").addEventListener("click", hideHorarioModal);
   
-  // Validación en tiempo real
-  const telefono = document.getElementById("telefono");
-  const direccion = document.getElementById("direccion_principal");
-  const barrio = document.getElementById("barrio");
-  const metodoPago = document.getElementById("metodo-pago");
-  
-  telefono.addEventListener("input", () => {
-    // Solo permitir números
-    telefono.value = telefono.value.replace(/\D/g, "");
-    updateOrderButton();
-  });
-  
-  telefono.addEventListener("blur", validateForm);
-  direccion.addEventListener("input", updateOrderButton);
-  direccion.addEventListener("blur", validateForm);
-  barrio.addEventListener("change", updateUI);
-  metodoPago.addEventListener("change", updateOrderButton);
-  
-  // Inicialización
   loadBarrios();
   updateUI();
-
-  const modal = document.getElementById("horario-modal");
-  const closeModalBtn = document.getElementById("close-horario-modal");
-
-  if (closeModalBtn) {
-    closeModalBtn.addEventListener("click", hideHorarioModal);
-  }
-
-  if (modal) {
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) hideHorarioModal();
-    });
-  }
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") hideHorarioModal();
-  });
 });

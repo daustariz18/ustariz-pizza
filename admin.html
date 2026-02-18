@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Ustariz Pizza</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos específicos para el panel de administración */
+    body { padding-bottom: 20px; }
+    .admin-container { padding: 20px; max-width: 600px; margin: 0 auto; }
+    .admin-card { 
+      background: var(--card); 
+      border-radius: 16px; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      border: 1px solid var(--gray-border); 
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 900;
+      margin-bottom: 15px;
+    }
+    .status-on { background: var(--green); color: white; }
+    .status-off { background: var(--accent); color: white; }
+    
+    .flavor-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .flavor-control:last-child { border: none; }
+    
+    /* Switch visual */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #444;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 4px; bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--green); }
+    input:checked + .slider:before { transform: translateX(24px); }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand-text">
+      <span class="brand-name">PANEL DE CONTROL</span>
+      <span class="brand-tagline">Ustariz Pizza Administrativo</span>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    
+    <div class="admin-card">
+      <div class="step-header" style="margin: 0 0 15px 0;">
+        <span class="step-badge">🚀</span>
+        <h2 class="step-text">Estado de la Tienda</h2>
+      </div>
+      <div id="shop-status-badge" class="status-badge status-on">CARGANDO...</div>
+      <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px;">
+        Usa este botón para cerrar la tienda totalmente por viajes o fuerza mayor.
+      </p>
+      <button id="main-toggle-btn" class="add-to-cart-btn" style="margin: 0; width: 100%;">
+        CAMBIAR ESTADO GENERAL
+      </button>
+    </div>
+
+    <div class="admin-card">
+      <div class="step-header" style="margin: 0 0 15px 0;">
+        <span class="step-badge">🍕</span>
+        <h2 class="step-text">Disponibilidad de Sabores</h2>
+      </div>
+      <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px;">
+        Desactiva los sabores que se hayan agotado hoy.
+      </p>
+      <div id="admin-flavor-list">
+        </div>
+    </div>
+
+    <button onclick="window.location.href='index.html'" class="order-btn" style="width: 100%; background: #333;">
+      VER MENÚ COMO CLIENTE
+    </button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // PEGA AQUÍ TUS CREDENCIALES DE FIREBASE (Las que obtuviste en el paso anterior)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPtNqWL8auMiWfu3rNA992MWSFZVhVSbc",
+      authDomain: "ustariz-pizza.firebaseapp.com",
+      databaseURL: "https://ustariz-pizza-default-rtdb.firebaseio.com",
+      projectId: "ustariz-pizza",
+      storageBucket: "ustariz-pizza.firebasestorage.app",
+      messagingSenderId: "1016949121809",
+      appId: "1:1016949121809:web:b197ca9e34d263942f22b0",
+      measurementId: "G-DWL8WKFQJD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Lista de sabores original de tu script.js
+    const SABORES = ["Salami", "Jamon", "Pollo", "Pepperoni", "Salami Pimenton", "Hawaiana", "Pollo Jamon", "3 Carnes"];
+    
+    let currentConfig = {
+      appEncendida: true,
+      saboresAgotados: []
+    };
+
+    // Escuchar cambios actuales
+    onValue(ref(db, 'configuracion'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        currentConfig = data;
+        actualizarInterfaz();
+      }
+    });
+
+    function actualizarInterfaz() {
+      // Actualizar Botón Maestro
+      const badge = document.getElementById('shop-status-badge');
+      badge.textContent = currentConfig.appEncendida ? "SISTEMA ABIERTO" : "SISTEMA CERRADO";
+      badge.className = `status-badge ${currentConfig.appEncendida ? 'status-on' : 'status-off'}`;
+
+      // Actualizar Lista de Sabores
+      const container = document.getElementById('admin-flavor-list');
+      container.innerHTML = "";
+
+      SABORES.forEach(sabor => {
+        const estaAgotado = (currentConfig.saboresAgotados || []).includes(sabor);
+        const div = document.createElement('div');
+        div.className = 'flavor-control';
+        div.innerHTML = `
+          <span>${sabor}</span>
+          <label class="switch">
+            <input type="checkbox" ${estaAgotado ? '' : 'checked'} onchange="toggleSabor('${sabor}')">
+            <span class="slider"></span>
+          </label>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Funciones globales para los eventos onchange
+    globalThis.toggleSabor = (sabor) => {
+      let agotados = currentConfig.saboresAgotados || [];
+      if (agotados.includes(sabor)) {
+        agotados = agotados.filter(s => s !== sabor);
+      } else {
+        agotados.push(sabor);
+      }
+      set(ref(db, 'configuracion/saboresAgotados'), agotados);
+    };
+
+    document.getElementById('main-toggle-btn').onclick = () => {
+      set(ref(db, 'configuracion/appEncendida'), !currentConfig.appEncendida);
+    };
+
+  </script>
+</body>
+</html>

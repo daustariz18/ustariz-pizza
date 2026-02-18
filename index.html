@@ -90,20 +90,17 @@
     </div>
   </section>
 
-  <div id="sistema-status-msg" style="display: none; margin: 10px 16px; padding: 12px; border-radius: 10px; background: rgba(230, 57, 70, 0.15); border: 1px solid var(--accent); color: white; text-align: center; font-size: 0.9rem;">
+  <div id="sistema-status-msg" style="display: none; margin: 10px 16px; padding: 12px; border-radius: 10px; background: rgba(0, 0, 0, 0.85); border: 1px solid var(--accent); color: white; text-align: center; font-size: 0.9rem;">
   ⚠️ <strong>¡Lo sentimos!</strong> En este momento no estamos recibiendo pedidos. Nuestro horario es de 5:00 PM a 10:00 PM.
   </div>
 
   <div id="horario-modal" class="modal-backdrop" style="display: none;">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="horario-modal-title">
+    <dialog class="modal-card" aria-labelledby="horario-modal-title" open>
       <h3 id="horario-modal-title">Fuera de horario</h3>
       <p id="horario-modal-message">En este momento no estamos recibiendo pedidos.</p>
       <button id="close-horario-modal" class="modal-close-btn">Entendido</button>
-    </div>
+    </dialog>
   </div>
-
-<footer class="cart-panel">
-  </footer>
 
   <footer class="cart-panel">
     <div class="summary">
@@ -120,6 +117,6 @@
     </button>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
