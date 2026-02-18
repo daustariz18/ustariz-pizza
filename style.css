@@ -17,7 +17,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding-bottom: 140px; /* Espacio para el panel flotante */
+  padding-bottom: 230px; /* Espacio para panel de pedido + franja final */
 }
 
 /* ================= NOTIFICACIONES TOAST ================= */
@@ -79,6 +79,23 @@ body {
 .logo { height: 44px; width: auto; }
 .brand-name { display: block; font-weight: 900; font-size: 1.2rem; line-height: 1; }
 .brand-tagline { font-size: 0.65rem; text-transform: uppercase; color: var(--price); letter-spacing: 1px; }
+
+.floating-hours-alert {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 196px;
+  z-index: 2600;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  animation: fadeIn 0.25s ease;
+}
 
 /* ================= PASOS Y HEADERS ================= */
 .step-header {
@@ -357,10 +374,40 @@ body {
   color: #ddd;
 }
 
+.site-credit {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 16px;
+  background: var(--price);
+  border-top: 1px solid var(--price);
+  border-bottom: 1px solid var(--price);
+}
+
+.site-credit-logo {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+}
+
+.site-credit-text {
+  font-size: 0.78rem;
+  letter-spacing: 0.2px;
+  font-weight: 600;
+  color: #000;
+}
+
 /* ================= FOOTER PANEL ================= */
 .cart-panel {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  bottom: 52px; left: 0; right: 0;
   background: #1b1b1b;
   padding: 16px;
   border-top: 1px solid var(--gray-border);

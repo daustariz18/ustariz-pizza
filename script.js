@@ -100,7 +100,9 @@ function sistemaAbierto() {
 
 function renderMenu() {
   const grid = document.getElementById("menu-content");
+  if (!grid) return;
   grid.innerHTML = "";
+  let visibles = 0;
 
   Object.entries(MENU[activeSize]).forEach(([sabor, precio]) => {
     // FILTRADO DINÁMICO: Si el admin lo marcó como agotado, desaparece del menú
@@ -116,7 +118,12 @@ function renderMenu() {
       </div>`;
     card.onclick = () => toggleFlavor(sabor);
     grid.appendChild(card);
+    visibles += 1;
   });
+
+  if (visibles === 0) {
+    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; background: var(--card); border: 1px solid var(--gray-border); border-radius: 12px;">No hay sabores disponibles por el momento.</div>`;
+  }
   updateAddButton();
 }
 
@@ -129,8 +136,19 @@ async function updateUI() {
   const orderBtn = document.getElementById("submit-order");
   const addBtn = document.getElementById("add-to-cart-btn");
   const statusMsg = document.getElementById("sistema-status-msg");
+  const floatingAlert = document.getElementById("horario-floating-alert");
+
+  // Asegurar render de elementos visuales aunque falte algún nodo del footer
+  renderTabs();
+  renderMenu();
+  if (!orderBtn || !addBtn) return;
 
   const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
+
+  if (floatingAlert) {
+    floatingAlert.textContent = `⚠️ Estamos por fuera del horario de atención. ${horarioTexto}`;
+    floatingAlert.style.display = dentroHorario ? "none" : "block";
+  }
   
   if (!abierta) {
     const isForceClosed = appEncendida === false;
@@ -159,8 +177,6 @@ async function updateUI() {
   updateCartList();
   updateSelectionText();
   updateSummary();
-  renderTabs();
-  renderMenu();
 }
 
 /* ================= EL RESTO DE TUS FUNCIONES (TOAST, CART, ETC) ================= */
@@ -375,4 +391,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
   loadBarrios();
   updateUI();
+  setInterval(updateUI, 30000);
+  globalThis.addEventListener("focus", updateUI);
 });
