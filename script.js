@@ -94,6 +94,10 @@ function verificarHorario() {
   return hora >= CONFIG_SISTEMA.HORA_APERTURA && hora < CONFIG_SISTEMA.HORA_CIERRE;
 }
 
+function sistemaAbierto() {
+  return verificarHorario() && CONFIG_SISTEMA.estadoRemoto.appEncendida;
+}
+
 function renderMenu() {
   const grid = document.getElementById("menu-content");
   grid.innerHTML = "";
@@ -120,6 +124,7 @@ async function updateUI() {
   // 1. Verificar Disponibilidad General
   const dentroHorario = verificarHorario();
   const appEncendida = CONFIG_SISTEMA.estadoRemoto.appEncendida;
+  const abierta = sistemaAbierto();
   
   const orderBtn = document.getElementById("submit-order");
   const addBtn = document.getElementById("add-to-cart-btn");
@@ -127,7 +132,7 @@ async function updateUI() {
 
   const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
   
-  if (!dentroHorario || !appEncendida) {
+  if (!abierta) {
     const isForceClosed = appEncendida === false;
     const msg = isForceClosed ? "CERRADO POR FUERZA MAYOR" : "FUERA DE HORARIO";
     orderBtn.disabled = true;
@@ -187,6 +192,12 @@ function toggleFlavor(sabor) {
 }
 
 function addToCart() {
+  if (!sistemaAbierto()) {
+    showToast("El sistema está cerrado en este momento", "error");
+    updateAddButton();
+    return;
+  }
+
   if (selectedFlavors.length === 0) return;
   const unitPrice = Math.max(...selectedFlavors.map(s => MENU[activeSize][s]));
   const item = {
@@ -272,7 +283,7 @@ function updateOrderButton() {
   const dir = document.getElementById("direccion_principal").value;
   const pago = document.getElementById("metodo-pago").value;
 
-  const abierta = verificarHorario() && CONFIG_SISTEMA.estadoRemoto.appEncendida;
+  const abierta = sistemaAbierto();
   orderBtn.disabled = !(cart.length > 0 && barrio && validatePhone(tel) && dir.length >= 10 && pago && abierta);
 }
 
@@ -335,7 +346,11 @@ function updateSummary() {
   updateTotal();
   updateOrderButton();
 }
-function updateAddButton() { document.getElementById("add-to-cart-btn").disabled = selectedFlavors.length === 0; }
+function updateAddButton() {
+  const addBtn = document.getElementById("add-to-cart-btn");
+  const abierta = sistemaAbierto();
+  addBtn.disabled = selectedFlavors.length === 0 || abierta === false;
+}
 function loadBarrios() {
   const sel = document.getElementById("barrio");
   Object.entries(BARRIOS).forEach(([b, v]) => {
