@@ -7,6 +7,9 @@
 
   <link rel="stylesheet" href="style.css?v=20260219-3">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff6600">
+  <link rel="apple-touch-icon" href="img/ustariz_pizza_logo_1.png">
 </head>
 <body>
 
@@ -127,5 +130,10 @@
   </footer>
 
   <script type="module" src="script.js?v=20260219-2"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' });
+  }
+  </script>
 </body>
 </html>

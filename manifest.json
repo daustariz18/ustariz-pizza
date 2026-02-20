@@ -1,0 +1,22 @@
+{
+  "name": "Ustariz Pizza",
+  "short_name": "Ustariz",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ff6600",
+  "theme_color": "#ff6600",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "img/ustariz_pizza_logo_1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "img/ustariz_pizza_logo_2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
