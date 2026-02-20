@@ -19,7 +19,7 @@ const db = getDatabase(app);
 /* ================= CONTROL OPERATIVO REMOTO ================= */
 const CONFIG_SISTEMA = {
   HORA_APERTURA: 12,
-  HORA_CIERRE: 23,
+  HORA_CIERRE: 24,
   estadoRemoto: {
     appEncendida: true,
     saboresAgotados: [] 
@@ -90,8 +90,17 @@ let cart = [];
 /* ================= FUNCIONES CORE ================= */
 
 function verificarHorario() {
+  const apertura = CONFIG_SISTEMA.HORA_APERTURA;
+  const cierre = CONFIG_SISTEMA.HORA_CIERRE;
+
+  if ((apertura === 0 && cierre === 24) || apertura === cierre) return true;
+
   const hora = new Date().getHours();
-  return hora >= CONFIG_SISTEMA.HORA_APERTURA && hora < CONFIG_SISTEMA.HORA_CIERRE;
+  if (apertura < cierre) {
+    return hora >= apertura && hora < cierre;
+  }
+
+  return hora >= apertura || hora < cierre;
 }
 
 function sistemaAbierto() {
@@ -143,7 +152,9 @@ async function updateUI() {
   renderMenu();
   if (!orderBtn || !addBtn) return;
 
-  const horarioTexto = `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
+  const horarioTexto = esHorario24Horas()
+    ? "Atendemos las 24 horas."
+    : `Nuestro horario es de ${formatHour24To12(CONFIG_SISTEMA.HORA_APERTURA)} a ${formatHour24To12(CONFIG_SISTEMA.HORA_CIERRE)}.`;
 
   if (floatingAlert) {
     floatingAlert.textContent = `⚠️ Estamos por fuera del horario de atención. ${horarioTexto}`;
@@ -320,8 +331,13 @@ function handleOrder() {
 /* ================= FUNCIONES DE APOYO UI ================= */
 function formatHour24To12(h) {
   if (h === 0) return "12:00 AM";
+  if (h === 24) return "12:00 AM";
   if (h === 12) return "12:00 PM";
   return h > 12 ? `${h - 12}:00 PM` : `${h}:00 AM`;
+}
+function esHorario24Horas() {
+  const { HORA_APERTURA: apertura, HORA_CIERRE: cierre } = CONFIG_SISTEMA;
+  return (apertura === 0 && cierre === 24) || apertura === cierre;
 }
 function hideHorarioModal() { document.getElementById("horario-modal").style.display = "none"; document.body.style.overflow = ""; }
 function updateSelectionText() {
