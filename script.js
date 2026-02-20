@@ -20,6 +20,7 @@ const db = getDatabase(app);
 const CONFIG_SISTEMA = {
   HORA_APERTURA: 12,
   HORA_CIERRE: 24,
+  TIMEZONE: "America/Bogota",
   estadoRemoto: {
     appEncendida: true,
     saboresAgotados: [] 
@@ -30,7 +31,9 @@ const CONFIG_SISTEMA = {
 onValue(ref(db, 'configuracion'), (snapshot) => {
   const data = snapshot.val();
   if (data) {
-    CONFIG_SISTEMA.estadoRemoto.appEncendida = data.appEncendida;
+    CONFIG_SISTEMA.estadoRemoto.appEncendida = typeof data.appEncendida === "boolean"
+      ? data.appEncendida
+      : true;
     CONFIG_SISTEMA.estadoRemoto.saboresAgotados = data.saboresAgotados || [];
     
     // Cada vez que cambie algo en el admin, refrescamos la interfaz del cliente
@@ -95,12 +98,26 @@ function verificarHorario() {
 
   if ((apertura === 0 && cierre === 24) || apertura === cierre) return true;
 
-  const hora = new Date().getHours();
+  const hora = obtenerHoraBogota();
   if (apertura < cierre) {
     return hora >= apertura && hora < cierre;
   }
 
   return hora >= apertura || hora < cierre;
+}
+
+function obtenerHoraBogota() {
+  try {
+    const hora = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: CONFIG_SISTEMA.TIMEZONE
+    }).format(new Date());
+
+    return Number(hora);
+  } catch {
+    return new Date().getHours();
+  }
 }
 
 function sistemaAbierto() {
