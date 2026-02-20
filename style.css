@@ -6,6 +6,7 @@
   --text: #ffffff;
   --green: #25d366;
   --gray-border: rgba(255, 255, 255, 0.1);
+  --site-credit-height: 52px;
 }
 
 * {
@@ -17,7 +18,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding-bottom: 230px; /* Espacio para panel de pedido + franja final */
+  padding-bottom: calc(230px + env(safe-area-inset-bottom)); /* Espacio para panel de pedido + franja final */
 }
 
 /* ================= NOTIFICACIONES TOAST ================= */
@@ -384,8 +385,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 52px;
-  padding: 8px 16px;
+  min-height: var(--site-credit-height);
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
   background: var(--price);
   border-top: 1px solid var(--price);
   border-bottom: 1px solid var(--price);
@@ -407,7 +408,7 @@ body {
 /* ================= FOOTER PANEL ================= */
 .cart-panel {
   position: fixed;
-  bottom: 52px; left: 0; right: 0;
+  bottom: calc(var(--site-credit-height) + env(safe-area-inset-bottom)); left: 0; right: 0;
   background: #1b1b1b;
   padding: 16px;
   border-top: 1px solid var(--gray-border);
@@ -454,6 +455,25 @@ body {
 @media (min-width: 768px) {
   .tabs-grid { grid-template-columns: repeat(4, 1fr); }
   .menu-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --site-credit-height: 44px;
+  }
+
+  .site-credit {
+    gap: 8px;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .site-credit-logo {
+    height: 18px;
+  }
+
+  .site-credit-text {
+    font-size: 0.68rem;
+  }
 }
 
 .order-btn:disabled { 
