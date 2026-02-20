@@ -19,7 +19,7 @@ const db = getDatabase(app);
 /* ================= CONTROL OPERATIVO REMOTO ================= */
 const CONFIG_SISTEMA = {
   HORA_APERTURA: 12,
-  HORA_CIERRE: 22,
+  HORA_CIERRE: 23,
   estadoRemoto: {
     appEncendida: true,
     saboresAgotados: [] 
