@@ -18,7 +18,7 @@ const db = getDatabase(app);
 
 /* ================= CONTROL OPERATIVO REMOTO ================= */
 const CONFIG_SISTEMA = {
-  HORA_APERTURA: 17,
+  HORA_APERTURA: 12,
   HORA_CIERRE: 22,
   estadoRemoto: {
     appEncendida: true,
@@ -312,7 +312,7 @@ function handleOrder() {
   const domicilio = BARRIOS[document.getElementById("barrio").value] || 0;
   const lista = cart.map(i => `• ${i.size}: ${i.text}`).join("\n");
   
-  const msg = `🍕 *NUEVO PEDIDO - USTARIZ PIZZA*\n\n${lista}\n\n📍 *Dir:* ${document.getElementById("direccion_principal").value}\n🏘️ *Barrio:* ${document.getElementById("barrio").value}\n💳 *Pago:* ${pagoKey}\n⭐ *TOTAL:* $${(subtotal + domicilio).toLocaleString()}`;
+  const msg = `🍕 *NUEVO PEDIDO - USTARIZ PIZZA*\n\n${lista}\n\n📍 *Dirección:* ${document.getElementById("direccion_principal").value}\n🏘️ *Barrio:* ${document.getElementById("barrio").value}\n💳 *Pago:* ${pagoKey}\n⭐ *TOTAL:* $${(subtotal + domicilio).toLocaleString()}`;
   
   globalThis.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 }
