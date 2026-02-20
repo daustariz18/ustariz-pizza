@@ -18,6 +18,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
+  padding-bottom: 230px; /* Fallback */
   padding-bottom: calc(230px + env(safe-area-inset-bottom)); /* Espacio para panel de pedido + franja final */
 }
 
@@ -386,6 +387,7 @@ body {
   justify-content: center;
   gap: 10px;
   min-height: var(--site-credit-height);
+  padding: 8px 16px;
   padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
   background: var(--price);
   border-top: 1px solid var(--price);
@@ -408,6 +410,7 @@ body {
 /* ================= FOOTER PANEL ================= */
 .cart-panel {
   position: fixed;
+  bottom: var(--site-credit-height);
   bottom: calc(var(--site-credit-height) + env(safe-area-inset-bottom)); left: 0; right: 0;
   background: #1b1b1b;
   padding: 16px;
@@ -464,6 +467,7 @@ body {
 
   .site-credit {
     gap: 8px;
+    padding: 6px 12px;
     padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
   }
 
